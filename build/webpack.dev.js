@@ -10,6 +10,7 @@ module.exports = merge(webpackConfigBase, {
     devServer: {
         hot: true,
         port: 3001,
+        historyApiFallback: true,
     },
     module: {
         rules: [

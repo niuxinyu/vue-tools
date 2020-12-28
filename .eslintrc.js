@@ -54,4 +54,14 @@ module.exports = {
         '@typescript-eslint/camelcase': 0,
         // 更多规则 https://cn.eslint.org/docs/rules/
     },
+    settings: {
+        'import/resolver': {
+            alias: {
+                map: [
+                    ['@', './src'],
+                ],
+                extensions: ['.ts', '.js', '.jsx', '.json'],
+            },
+        },
+    },
 };
