@@ -7,6 +7,7 @@ module.exports = {
     extends: [
         'plugin:vue/essential',
         'airbnb-base',
+        'plugin:@typescript-eslint/recommended',
     ],
     globals: {
         Atomics: 'readonly',
@@ -47,6 +48,22 @@ module.exports = {
         // import 不必包含空行
         'import/newline-after-import': 0,
         'class-methods-use-this': 0,
+        // 允许非默认导出
+        'import/prefer-default-export': 0,
+        // 不强制解构优先
+        'prefer-destructuring': 0,
+        // 允许 for in
+        'no-restricted-syntax': 0,
+        // 允许对函数参数重新赋值
+        'no-param-reassign': 0,
+        // 允许返回语句赋值
+        'no-return-assign': 0,
+        // 允许 ++ --
+        'no-plusplus': 0,
+        // 允许空 return
+        'no-useless-return': 0,
+        // 允许 arguments
+        'prefer-rest-params': 0,
         // ts
         // 允许在ts内使用var和require
         '@typescript-eslint/no-var-requires': 0,
@@ -60,7 +77,7 @@ module.exports = {
                 map: [
                     ['@', './src'],
                 ],
-                extensions: ['.ts', '.js', '.jsx', '.json'],
+                extensions: ['.ts', '.js', '.jsx', '.json', '.d.ts'],
             },
         },
     },
