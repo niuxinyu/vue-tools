@@ -6,10 +6,10 @@ const routes: Array<RouteConfig> = [
         path: '/preview',
         component: () => import('@/views/preview.vue'),
     },
-    {
-        path: '/',
-        redirect: '/preview',
-    },
+    // {
+    //     path: '/',
+    //     redirect: '/preview',
+    // },
 ];
 
 Vue.use(VueRouter);
