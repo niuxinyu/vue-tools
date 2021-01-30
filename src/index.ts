@@ -1,12 +1,29 @@
-import Vue from 'vue';
-import router from '@/router';
-import App from './App.vue';
+import { VueConstructor } from 'vue';
+import Preview from './components/preview/index';
 
-// Vue.config.errorHandler = function (err: Error, vm, info) {
-//     console.log(err);
-// };
+const components = {
+    Preview,
+} as Record<string, any>;
 
-new Vue({
-    router,
-    render: (h) => h(App),
-}).$mount('#app');
+const install = (Vue: VueConstructor, options = {}) => {
+    Object.keys(components)
+        .forEach((key: string) => {
+            Vue.component(key, components[key]);
+        });
+
+    Vue.prototype.$preview = Preview.instance;
+};
+
+// auto install
+if (typeof window !== 'undefined' && window.Vue) {
+    install(window.Vue);
+}
+
+// todo
+export {
+    Preview,
+};
+
+export default {
+    install,
+};

@@ -4,7 +4,7 @@ import VueRouter, { RouteConfig } from 'vue-router';
 const routes: Array<RouteConfig> = [
     {
         path: '/preview',
-        component: () => import('@/views/preview.vue'),
+        component: () => import('@/components/preview/preview.vue'),
     },
     // {
     //     path: '/',

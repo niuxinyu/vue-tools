@@ -15,6 +15,7 @@ const config = {
             resolve('__test__'),
             resolve('assets'),
             resolve('static'),
+            resolve('examples'),
         ],
         exclude: resolve('node_modules'),
     },

@@ -1,22 +1,20 @@
 <template>
-    <div id="app">
-        <!--        <router-view></router-view>-->
-        <preview
-            :img-list="imgList"
-            @change="handleGetMsg"
-        ></preview>
+    <div>
+        <ul>
+            <li>
+                <router-link to="/preview">preview</router-link>
+            </li>
+        </ul>
+        <router-view></router-view>
     </div>
 </template>
+
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Preview from './views/preview.vue';
 
-@Component({
-    components: {
-        Preview
-    }
-})
+@Component
 export default class App extends Vue {
+
     private imgList = [
         {
             id: 1,
@@ -31,21 +29,9 @@ export default class App extends Vue {
             url: 'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2005235653,1742582269&fm=26&gp=0.jpg',
         },
     ];
-
-    private handleGetMsg (msg: string) {
-        console.log(msg);
-    }
 }
 </script>
-<style>
-html, body {
-    padding: 0;
-    margin: 0;
-    background: red;
-}
 
-#app {
-    width: 100%;
-    height: 100%;
-}
+<style scoped>
+
 </style>

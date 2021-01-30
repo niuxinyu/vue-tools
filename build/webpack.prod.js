@@ -4,10 +4,22 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
+const webpack = require('webpack');
 const webpackConfigBase = require('./webpack.base');
-const { pro } = require('./config');
+const {
+    pro,
+    copyright,
+} = require('./config');
 
 function getRules () {
+    if (process.env.CSSIN) {
+        return [
+            {
+                test: /.(le|c)ss$/,
+                use: ['style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
+            },
+        ];
+    }
     return [
         {
             test: /\.(le|c)ss$/,
@@ -34,8 +46,10 @@ function getPlugins () {
             filename: 'css/[name].css',
         }),
         new OptimizeCSSAssetsPlugin(),
+        new webpack.BannerPlugin(copyright),
     ];
 }
+
 // eslint-disable-next-line
 const ignoreBundle = {
     vue: {
@@ -44,13 +58,26 @@ const ignoreBundle = {
         amd: 'vue',
         root: 'vue',
     },
+    'vue-class-component': {
+        commonjs: 'vue-class-component',
+        commonjs2: 'vue-class-component',
+        amd: 'vue-class-component',
+        root: 'vue-class-component',
+    },
 };
 
 module.exports = merge(webpackConfigBase, {
     mode: 'production',
+    devtool: 'source-map',
+    entry: './src/index.ts',
     output: {
-        filename: 'js/[name].[hash:5].js',
+        // todo
+        // 图片打包后的路径存在问题
+        publicPath: './',
         path: path.resolve(__dirname, '../dist'),
+        filename: 'vue-tools.min.js',
+        library: 'vue-tools',
+        libraryTarget: 'umd',
     },
     optimization: {
         minimizer: [
@@ -65,5 +92,5 @@ module.exports = merge(webpackConfigBase, {
         rules: getRules(),
     },
     plugins: getPlugins(),
-    // externals: ignoreBundle
+    externals: ignoreBundle,
 });

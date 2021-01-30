@@ -28,13 +28,21 @@ fileArr.forEach((file) => {
     entries[file] = `./src/${file}.ts`;
 });
 
+function getEntryBy () {
+    if (process.env.NODE_ENV) {
+        return {};
+    }
+
+    return {
+        ...entries,
+    };
+}
+
 module.exports = {
     context: project,
     // target: ['web', 'es5'],
     target: 'web',
-    entry: {
-        ...entries,
-    },
+    // entry: getEntryBy(),
     resolve: {
         alias,
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.vue'],
@@ -92,29 +100,25 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: './public/index.html',
-        }),
     ],
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                vendor: {
-                    priority: 1,
-                    name: 'vendor',
-                    test: /node_modules/,
-                    chunks: 'initial',
-                    minSize: 0,
-                    minChunks: 1,
-                },
-                common: {
-                    chunks: 'initial',
-                    name: 'common',
-                    minSize: 100,
-                    minChunks: 3,
-                },
-            },
-        },
-    },
+    // optimization: {
+    //     splitChunks: {
+    //         cacheGroups: {
+    //             vendor: {
+    //                 priority: 1,
+    //                 name: 'vendor',
+    //                 test: /node_modules/,
+    //                 chunks: 'initial',
+    //                 minSize: 0,
+    //                 minChunks: 1,
+    //             },
+    //             common: {
+    //                 chunks: 'initial',
+    //                 name: 'common',
+    //                 minSize: 100,
+    //                 minChunks: 3,
+    //             },
+    //         },
+    //     },
+    // },
 };

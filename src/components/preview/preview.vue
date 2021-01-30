@@ -1,53 +1,63 @@
 <template>
-    <div class="img-preview">
-        <div class="bg"></div>
-        <div class="img-scroll-wrapper">
-            <div
-                :style="getPreviewWrapper"
-                class="preview-wrapper"
-            >
-                <div v-for="(item, index) in cloneImgList"
-                     :key="item.id"
-                     :style="getStyle"
-                     class="preview-item"
+    <transition name="fade">
+        <div v-if="value || shouldShow" class="img-preview">
+            <div class="bg"></div>
+            <div class="img-scroll-wrapper">
+                <div
+                    :style="getPreviewWrapper"
+                    class="preview-wrapper"
                 >
-                    <img
-                        :src="item.url"
-                        :style="getImgStyle(index)"
-                        class="preview-img"
-                        draggable="false"
+                    <div v-for="(item, index) in cloneImgList"
+                         :key="item.id"
+                         :style="getStyle"
+                         class="preview-item"
                     >
+                        <img
+                            :src="item.url"
+                            :style="getImgStyle(index)"
+                            class="preview-img"
+                            draggable="false"
+                        >
+                    </div>
                 </div>
-            </div>
-            <div class="prev" @click="handlePrev">
-                <img :src="Prev" alt="">
-            </div>
-            <div class="next" @click="handleNext">
-                <img :src="Next" alt="">
-            </div>
-            <div class="action">
-                <div class="action__img-wrapper action__minus" @click="scaleMinus">
-                    <img :src="Minus" title="缩小">
+                <div class="close">
+                    <img :src="Close" title="关闭" @click="handleClose">
                 </div>
-                <div class="action__img-wrapper action__plus" @click="scaleAdd">
-                    <img :src="Plus" title="放大">
+                <div class="prev" @click="handlePrev">
+                    <img :src="Prev" alt="">
                 </div>
-                <div class="action__img-wrapper action__reset" @click="handleResetImgStyle">
-                    <img :src="Reset" title="初始大小">
+                <div class="next" @click="handleNext">
+                    <img :src="Next" alt="">
                 </div>
-                <div class="action__img-wrapper action__left-tan" @click="handleRotate('left')">
-                    <img :src="LeftTan" title="左旋转">
+                <div class="action">
+                    <div class="action__img-wrapper action__minus">
+                        <img :src="Minus" title="缩小" @click="scaleMinus">
+                    </div>
+                    <div class="action__img-wrapper action__plus">
+                        <img :src="Plus" title="放大" @click="scaleAdd">
+                    </div>
+                    <div class="action__img-wrapper action__reset">
+                        <img :src="Reset" title="初始大小" @click="handleResetImgStyle">
+                    </div>
+                    <div class="action__img-wrapper action__left-tan">
+                        <img :src="LeftTan" title="左旋转" @click="handleRotate('left')">
+                    </div>
+                    <div class="action__img-wrapper action__right-tan">
+                        <img :src="RightTan" title="右旋转" @click="handleRotate('right')">
+                    </div>
                 </div>
-                <div class="action__img-wrapper action__right-tan" @click="handleRotate('right')">
-                    <img :src="RightTan" title="右旋转">
+                <div class="page">
+                    {{ this.reallyIndex }} / {{ this.sourceImgList.length }}
                 </div>
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator';
+import {
+    Component, Emit, Prop, Vue, Watch,
+} from 'vue-property-decorator';
 import { css } from '@/libs/style';
 import { eventHandle } from '@/libs/dom';
 import { getUniqueId, simpleDeepClone, throttle } from '@/libs/tools';
@@ -58,17 +68,17 @@ import minus from '@/assets/minus.png';
 import reset from '@/assets/reset.png';
 import leftTan from '@/assets/left-90.png';
 import rightTan from '@/assets/right-90.png';
+import close from '@/assets/close.png';
+import { getNumber } from '@/libs/math';
 
 const TRANS = /translate3d\((\-?\d+)(px)?,\s?(\-?\d+)(px)?,\s?(\-?\d+)(px)?\)/;
 const ANIMATION = 'transform 200ms cubic-bezier(0.4, 0, 0.22, 1)'; // 动画
 @Component
 export default class Preview extends Vue {
 
-    @Prop({ default: () => ([]) }) private imgList!: any[];
-
-    private cloneImgList: any[] = [];
-
-    private sourceImgList: any[] = [];
+    // 保存实例
+    static instance: any;
+    @Prop({ default: () => [] }) private imgList!: any[];
 
     // UI
     private Prev = prev;
@@ -84,11 +94,11 @@ export default class Preview extends Vue {
     private LeftTan = leftTan;
 
     private RightTan = rightTan;
+    @Prop({ default: () => false }) private value!: boolean;
 
     // 内部显示索引
     private currentIndex = 1;
-
-    private imgItemList: NodeListOf<HTMLInputElement> = [];
+    private Close = close;
 
     // 初始化 scale 值
     private scaleInit = 1;
@@ -101,9 +111,8 @@ export default class Preview extends Vue {
 
     // 容器初始宽度
     private previewWrapperClientWidth = 0; // 客户端宽度
-
-    // 当前被操作的img元素
-    private currentImgElement = null;
+    // eslint-disable-next-line no-undef
+    private imgItemList!: NodeListOf<HTMLImageElement>;
 
     // 容器 是否切换动画
     private isCloseAnimation = true;
@@ -119,10 +128,21 @@ export default class Preview extends Vue {
 
     // 当前传入的数据是否有id
     private isDataHasId = false;
+    // 当前被操作的img元素
+    private currentImgElement!: HTMLImageElement;
+    // public API
+    private shouldShow = false;
+    // 用来保存和回调值内的index一样的索引，以显示页标
+    private reallyIndex = 1;
+    // 保存合复制数据源
+    private cloneImgList: any[] = [];
+    private sourceImgList: any[] = [];
+    // 标记当前是否为错误状态
+    private isError = false;
 
     public get getStyle () {
         return {
-            width: this.previewWrapperClientWidth + 'px',
+            width: `${this.previewWrapperClientWidth}px`,
         };
     }
 
@@ -130,17 +150,17 @@ export default class Preview extends Vue {
         return (index: number) => {
             if (this.currentIndex === index) {
                 return {
-                    'transform': `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
+                    transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
                     'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
                     'margin-left': '0px',
-                    'margin-top': '0px'
+                    'margin-top': '0px',
                 };
             }
             return {
-                'transform': `scale(1) rotate(0deg)`,
+                transform: 'scale(1) rotate(0deg)',
                 'transition-duration': '0ms',
                 'margin-left': '0px',
-                'margin-top': '0px'
+                'margin-top': '0px',
             };
         };
     }
@@ -149,40 +169,66 @@ export default class Preview extends Vue {
         return {
             transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
             'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
-            width: this.cloneImgList.length * this.previewWrapperClientWidth + 'px'
+            width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
         };
+    }
+
+    public handleToggleShow (value: boolean) {
+        this.shouldShow = value;
     }
 
     @Emit()
     change () {
         // 当前图片的可能用到的值
+        this.reallyIndex = this.currentIndex;
         return {
             id: this.sourceImgList[this.currentIndex - 1].id,
             actionType: this.actionType,
             currentIndex: this.currentIndex - 1,
             imgUrl: this.imgItemList[this.currentIndex - 1].getAttribute('src'),
             scale: this.scaleInit,
-            rotate: this.rotate
+            rotate: this.rotate,
         };
     }
 
     public mounted () {
-        this.$nextTick(() => {
-            this.imgItemList = (document.querySelectorAll('.preview-img'));
+        // 在下一次 eventloop 中取dom
+        setTimeout(() => {
             eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
             eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
             eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
-
-            Array.prototype.forEach.call(this.imgItemList, (item: any) => {
-                eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-            });
-
-            this.previewWrapperClientWidth = document.querySelector('.img-scroll-wrapper')?.clientWidth;
+            if (!this.imgItemList || !this.imgItemList.length) {
+                this.imgItemList = (document.querySelectorAll('.preview-img'));
+                Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
+                    eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+                });
+            }
+            if (this.previewWrapperClientWidth === 0) {
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
+            }
         });
+    }
+
+    @Watch('value')
+    onValueChange (newVal: boolean, oldVal: boolean) {
+        if (newVal !== oldVal) {
+            this.$nextTick(() => {
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
+                this.imgItemList = (document.querySelectorAll('.preview-img'));
+                Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
+                    eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+                });
+            });
+        }
     }
 
     @Watch('imgList', { immediate: true })
     onImgListChange (newVal: any[]) {
+        if (!Array.isArray(newVal) || newVal.length === 0) {
+            this.isError = true;
+            throw new Error('The imgList must be a non-empty array. ');
+        }
+
         // 当前数据是否有id
         this.isDataHasId = (newVal.length > 0 ? !!newVal[0].id : false);
         this.sourceImgList = newVal;
@@ -193,8 +239,17 @@ export default class Preview extends Vue {
         this.cloneImgList = [
             first,
             ...newVal,
-            last
+            last,
         ];
+        this.sourceImgList.forEach((item: any) => {
+            item.id = getUniqueId();
+        });
+    }
+
+    private handleClose () {
+        this.shouldShow = false;
+        this.$emit('input', false);
+        this.$emit('close', false);
     }
 
     private getCurrentImgElement (params: any) {
@@ -203,7 +258,7 @@ export default class Preview extends Vue {
         }
     }
 
-    private scaleAdd (e: Event) {
+    private scaleAdd () {
         this.actionType = 'plus';
         this.getCurrentImgElement(this.currentIndex);
         this.scaleInit += 0.2;
@@ -218,6 +273,8 @@ export default class Preview extends Vue {
 
     private handleRotate (type: string, rotate = 90) {
         // 设置为 rotate
+        if (!this.canToggle) return;
+        this.canToggle = false;
         this.actionType = 'rotate';
         this.previewWrapper = document.querySelector('.preview-wrapper');
         this.getCurrentImgElement(this.currentIndex);
@@ -233,7 +290,7 @@ export default class Preview extends Vue {
 
     private handleResetImgStyle () {
         if (!this.currentImgElement) return;
-        this.currentImgElement.style.marginLeft = this.currentImgElement.style.marginTop = 0;
+        this.currentImgElement.style.marginLeft = this.currentImgElement.style.marginTop = '0';
         this.scaleInit = 1;
         this.rotate = 0;
     }
@@ -301,7 +358,9 @@ export default class Preview extends Vue {
     }
 
     private mouseHandle (event: Event) {
-        if (!this.currentImgElement) this.currentImgElement = event.target;
+        if (!this.currentImgElement && event.target) {
+            this.currentImgElement = (event.target as HTMLImageElement);
+        }
         event = eventHandle.getEvent(event);
         const delta = eventHandle.getWheelDelta(event);
         if (delta > 0) {
@@ -315,14 +374,17 @@ export default class Preview extends Vue {
     private getPositionNumber (x: number, y: number): Record<string, any> {
         let posCss: Record<string, any>;
         posCss = {
-            'margin-left': x + 'px',
-            'margin-top': y + 'px'
+            'margin-left': `${x}px`,
+            'margin-top': `${y}px`,
         };
         return posCss;
     }
 
     private handleMouseDown (e: MouseEvent) {
-        this.currentImgElement = e.target;
+        // 拖动貌似在某些情况下会有bug
+        // 测试出来再说
+        // console.log(e);
+        e.target && (this.currentImgElement = (e.target as HTMLImageElement));
         e.preventDefault();
         let diffX: number;
         let diffY: number;
@@ -342,8 +404,8 @@ export default class Preview extends Vue {
         const self = this;
 
         function handleMouseMove (e: MouseEvent) {
-            let currentLeft = e.clientX - diffX;
-            let currentTop = e.clientY - diffY;
+            const currentLeft = e.clientX - diffX;
+            const currentTop = e.clientY - diffY;
             css(self.currentImgElement, self.getPositionNumber(currentLeft, currentTop));
         }
 
@@ -362,7 +424,7 @@ export default class Preview extends Vue {
     // }
 
     private handleWindowResize (e: any) {
-        const currentWrapperClientWidth = document.querySelector('.img-scroll-wrapper')?.clientWidth;
+        const currentWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
         if (currentWrapperClientWidth < 550) return this.previewWrapperClientWidth = 550;
         this.previewWrapperClientWidth = currentWrapperClientWidth;
     }
@@ -379,7 +441,7 @@ export default class Preview extends Vue {
     top: 0;
     background-color: rgba(255, 255, 255, 0.6);
     overflow: hidden;
-    z-index: -1;
+    z-index: 9;
 }
 
 .img-preview {
@@ -426,21 +488,48 @@ export default class Preview extends Vue {
     }
 }
 
+.action-bg {
+    background: rgba(0, 0, 0, .45);
+    user-select: none;
+}
+
+.action-img {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    z-index: 999;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.close {
+    .action-bg();
+    .action-img();
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    img {
+        width: 36px;
+    }
+}
+
 .prev {
     position: fixed;
     top: calc(50% - 18px);
     left: 10px;
+    .action-bg();
 }
 
 .next {
     position: fixed;
     top: calc(50% - 18px);
     right: 10px;
+    .action-bg();
 }
 
 .prev, .next {
-    z-index: 999;
-    cursor: pointer;
+    .action-img();
 
     img {
         width: 36px;
@@ -456,9 +545,9 @@ export default class Preview extends Vue {
     bottom: 10%;
     transform: translate3d(-50%, 0, 0);
     z-index: 999;
-    background: rgba(0, 0, 0, .45);
     line-height: 12px;
     border-radius: 26px;
+    .action-bg();
 
     .action__img-wrapper {
         padding: 6px 10px;
@@ -469,5 +558,27 @@ export default class Preview extends Vue {
         width: 26px;
         height: 26px;
     }
+}
+
+.page {
+    .action-bg();
+    width: 46px;
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    z-index: 999;
+    transform: translate3d(-50%, 0, 0);
+    color: #fff;
+    padding: 2px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to {
+    opacity: 0;
 }
 </style>
