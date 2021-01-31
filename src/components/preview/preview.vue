@@ -1,54 +1,62 @@
 <template>
     <transition name="fade">
-        <div v-if="value || shouldShow" class="img-preview">
-            <div class="bg"></div>
-            <div class="img-scroll-wrapper">
+        <div v-if="value || shouldShow" :class="[prefixCls + 'img-preview']">
+            <div :class="[prefixCls + 'bg']"></div>
+            <div :class="[prefixCls + 'scroll-wrapper']">
                 <div
                     :style="getPreviewWrapper"
-                    class="preview-wrapper"
+                    :class="[prefixCls + 'wrapper']"
                 >
                     <div v-for="(item, index) in cloneImgList"
                          :key="item.id"
                          :style="getStyle"
-                         class="preview-item"
+                         :class="[prefixCls + 'item']"
                     >
                         <img
                             :src="item.url"
                             :style="getImgStyle(index)"
-                            class="preview-img"
+                            :class="[prefixCls + 'img']"
                             draggable="false"
                         >
                     </div>
                 </div>
-                <div class="close">
-                    <img :src="Close" title="关闭" @click="handleClose">
-                </div>
-                <div class="prev" @click="handlePrev">
-                    <img :src="Prev" alt="">
-                </div>
-                <div class="next" @click="handleNext">
-                    <img :src="Next" alt="">
-                </div>
-                <div class="action">
-                    <div class="action__img-wrapper action__minus">
-                        <img :src="Minus" title="缩小" @click="scaleMinus">
+                <transition name="fade">
+                    <div v-show="isActionWrapperShow" :class="[prefixCls + 'action-wrapper']">
+                        <div :class="prefixCls + 'page'">
+                            {{ this.reallyIndex }} / {{ this.sourceImgList.length }}
+                        </div>
+                        <div class="menu">
+                            <div class="menu-item" title="缩小">
+                                <Icon type="minus" @click="scaleMinus"></Icon>
+                            </div>
+                            <div class="menu-item" title="放大">
+                                <Icon type="plus" @click="scaleAdd"></Icon>
+                            </div>
+                            <div class="menu-item" title="重置">
+                                <Icon type="reset" @click="handleResetImgStyle"></Icon>
+                            </div>
+                            <div class="menu-item" title="左旋转">
+                                <Icon type="left-90" @click="handleRotate('left')"></Icon>
+                            </div>
+                            <div class="menu-item" title="右旋转">
+                                <Icon type="right-90" @click="handleRotate('right')"></Icon>
+                            </div>
+                            <div class="menu-item" title="关闭" @click="handleClose">
+                                <Icon type="close"></Icon>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action__img-wrapper action__plus">
-                        <img :src="Plus" title="放大" @click="scaleAdd">
+                </transition>
+                <transition-group name="fade" tag="div">
+                    <div v-show="isActionWrapperShow" key="prev" :class="[prefixCls + 'prev']" title="上一张"
+                         @click="handlePrev">
+                        <Icon type="arrow-left"></Icon>
                     </div>
-                    <div class="action__img-wrapper action__reset">
-                        <img :src="Reset" title="初始大小" @click="handleResetImgStyle">
+                    <div v-show="isActionWrapperShow" key="next" :class="[prefixCls + 'next']" title="下一张"
+                         @click="handleNext">
+                        <Icon type="arrow-right"></Icon>
                     </div>
-                    <div class="action__img-wrapper action__left-tan">
-                        <img :src="LeftTan" title="左旋转" @click="handleRotate('left')">
-                    </div>
-                    <div class="action__img-wrapper action__right-tan">
-                        <img :src="RightTan" title="右旋转" @click="handleRotate('right')">
-                    </div>
-                </div>
-                <div class="page">
-                    {{ this.reallyIndex }} / {{ this.sourceImgList.length }}
-                </div>
+                </transition-group>
             </div>
         </div>
     </transition>
@@ -61,44 +69,26 @@ import {
 import { css } from '@/libs/style';
 import { eventHandle } from '@/libs/dom';
 import { getUniqueId, simpleDeepClone, throttle } from '@/libs/tools';
-import prev from '@/assets/prev.png';
-import next from '@/assets/next.png';
-import plus from '@/assets/plus.png';
-import minus from '@/assets/minus.png';
-import reset from '@/assets/reset.png';
-import leftTan from '@/assets/left-90.png';
-import rightTan from '@/assets/right-90.png';
-import close from '@/assets/close.png';
 import { getNumber } from '@/libs/math';
 
 const TRANS = /translate3d\((\-?\d+)(px)?,\s?(\-?\d+)(px)?,\s?(\-?\d+)(px)?\)/;
 const ANIMATION = 'transform 200ms cubic-bezier(0.4, 0, 0.22, 1)'; // 动画
+const prefixCls = 'vt-preview-';
+
 @Component
 export default class Preview extends Vue {
 
     // 保存实例
     static instance: any;
-    @Prop({ default: () => [] }) private imgList!: any[];
 
-    // UI
-    private Prev = prev;
+    private prefixCls = prefixCls;
 
-    private Next = next;
+    @Prop({ default: () => ([]) }) private imgList!: any[];
 
-    private Plus = plus;
-
-    private Minus = minus;
-
-    private Reset = reset;
-
-    private LeftTan = leftTan;
-
-    private RightTan = rightTan;
     @Prop({ default: () => false }) private value!: boolean;
 
     // 内部显示索引
     private currentIndex = 1;
-    private Close = close;
 
     // 初始化 scale 值
     private scaleInit = 1;
@@ -111,6 +101,7 @@ export default class Preview extends Vue {
 
     // 容器初始宽度
     private previewWrapperClientWidth = 0; // 客户端宽度
+
     // eslint-disable-next-line no-undef
     private imgItemList!: NodeListOf<HTMLImageElement>;
 
@@ -165,13 +156,7 @@ export default class Preview extends Vue {
         };
     }
 
-    private get getPreviewWrapper () {
-        return {
-            transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
-            'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
-            width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
-        };
-    }
+    private isActionWrapperShow = true; // 当前操作菜单是否展示
 
     public handleToggleShow (value: boolean) {
         this.shouldShow = value;
@@ -191,20 +176,32 @@ export default class Preview extends Vue {
         };
     }
 
+    private actionWrapperTimer: any = 0;
+
+    public get getPreviewWrapper () {
+        return {
+            transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
+            'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
+            width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
+        };
+    }
+
     public mounted () {
         // 在下一次 eventloop 中取dom
         setTimeout(() => {
             eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
             eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
+            eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
+            eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
             eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
             if (!this.imgItemList || !this.imgItemList.length) {
-                this.imgItemList = (document.querySelectorAll('.preview-img'));
+                this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
                 Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
                     eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
                 });
             }
             if (this.previewWrapperClientWidth === 0) {
-                this.previewWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
             }
         });
     }
@@ -213,13 +210,30 @@ export default class Preview extends Vue {
     onValueChange (newVal: boolean, oldVal: boolean) {
         if (newVal !== oldVal) {
             this.$nextTick(() => {
-                this.previewWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
-                this.imgItemList = (document.querySelectorAll('.preview-img'));
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
+                this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
                 Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
                     eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
                 });
             });
         }
+    }
+
+    private handleShowActionWrapper () {
+        if (this.actionWrapperTimer) {
+            clearTimeout(this.actionWrapperTimer);
+            this.actionWrapperTimer = null;
+        }
+        if (!this.isActionWrapperShow) this.isActionWrapperShow = true;
+    }
+
+    private handleHiddenActionWrapper () {
+        if (this.actionWrapperTimer) return;
+        this.actionWrapperTimer = setTimeout(() => {
+            this.isActionWrapperShow = false;
+            clearTimeout(this.actionWrapperTimer);
+            this.actionWrapperTimer = null;
+        }, 1000);
     }
 
     @Watch('imgList', { immediate: true })
@@ -276,7 +290,7 @@ export default class Preview extends Vue {
         if (!this.canToggle) return;
         this.canToggle = false;
         this.actionType = 'rotate';
-        this.previewWrapper = document.querySelector('.preview-wrapper');
+        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
         this.getCurrentImgElement(this.currentIndex);
         eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
         this.handleRestartAnimation();
@@ -322,7 +336,7 @@ export default class Preview extends Vue {
 
         this.handleResetImgStyle();
         this.handleRestartAnimation();
-        this.previewWrapper = document.querySelector('.preview-wrapper');
+        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
         eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
     }
 
@@ -334,7 +348,7 @@ export default class Preview extends Vue {
 
         this.handleResetImgStyle();
         this.handleRestartAnimation();
-        this.previewWrapper = document.querySelector('.preview-wrapper');
+        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
         eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
     }
 
@@ -424,161 +438,9 @@ export default class Preview extends Vue {
     // }
 
     private handleWindowResize (e: any) {
-        const currentWrapperClientWidth = getNumber(document.querySelector('.img-scroll-wrapper')?.clientWidth);
+        const currentWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
         if (currentWrapperClientWidth < 550) return this.previewWrapperClientWidth = 550;
         this.previewWrapperClientWidth = currentWrapperClientWidth;
     }
 }
 </script>
-
-<style lang="less" scoped>
-
-.bg {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    background-color: rgba(255, 255, 255, 0.6);
-    overflow: hidden;
-    z-index: 9;
-}
-
-.img-preview {
-    width: 100%;
-    height: 100%;
-    //position: relative;
-}
-
-.img-scroll-wrapper {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    overflow: hidden;
-    left: 0;
-    top: 0;
-}
-
-.preview {
-
-    &-wrapper {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 999;
-    }
-
-    &-item {
-        width: 100%;
-        height: 100%;
-        float: left;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        img {
-            //transition: transform 200ms cubic-bezier(0.4, 0, 0.22, 1);
-            user-select: none;
-        }
-    }
-}
-
-.action-bg {
-    background: rgba(0, 0, 0, .45);
-    user-select: none;
-}
-
-.action-img {
-    width: 36px;
-    height: 36px;
-    padding: 6px;
-    z-index: 999;
-    cursor: pointer;
-    border-radius: 50%;
-}
-
-.close {
-    .action-bg();
-    .action-img();
-    position: absolute;
-    top: 10px;
-    right: 10px;
-
-    img {
-        width: 36px;
-    }
-}
-
-.prev {
-    position: fixed;
-    top: calc(50% - 18px);
-    left: 10px;
-    .action-bg();
-}
-
-.next {
-    position: fixed;
-    top: calc(50% - 18px);
-    right: 10px;
-    .action-bg();
-}
-
-.prev, .next {
-    .action-img();
-
-    img {
-        width: 36px;
-    }
-}
-
-.action {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    position: absolute;
-    left: 50%;
-    bottom: 10%;
-    transform: translate3d(-50%, 0, 0);
-    z-index: 999;
-    line-height: 12px;
-    border-radius: 26px;
-    .action-bg();
-
-    .action__img-wrapper {
-        padding: 6px 10px;
-    }
-
-    img {
-        cursor: pointer;
-        width: 26px;
-        height: 26px;
-    }
-}
-
-.page {
-    .action-bg();
-    width: 46px;
-    position: absolute;
-    left: 50%;
-    bottom: 6%;
-    z-index: 999;
-    transform: translate3d(-50%, 0, 0);
-    color: #fff;
-    padding: 2px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
-}
-
-.fade-enter, .fade-leave-to {
-    opacity: 0;
-}
-</style>

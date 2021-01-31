@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Document</title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="../../dist/vue-tools.min.js"></script>
+<div id="app">
+    <Preview
+        v-model="show"
+        :img-list="imgList"
+    ></Preview>
+    <button @click="show = !show">点击显示</button>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            show: false,
+            imgList: [
+                {
+                    url: 'https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg!0x0.webp'
+                }
+            ]
+        }
+    });
+</script>
+</body>
+</html>

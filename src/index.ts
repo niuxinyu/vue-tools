@@ -1,7 +1,10 @@
 import { VueConstructor } from 'vue';
 import Preview from './components/preview/index';
+import Icon from './components/svg/svg.vue';
+import './styles/index.less';
 
 const components = {
+    Icon,
     Preview,
 } as Record<string, any>;
 
@@ -21,6 +24,7 @@ if (typeof window !== 'undefined' && window.Vue) {
 
 // todo
 export {
+    Icon,
     Preview,
 };
 

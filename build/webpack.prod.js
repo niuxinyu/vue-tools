@@ -56,15 +56,15 @@ const ignoreBundle = {
         commonjs: 'vue',
         commonjs2: 'vue',
         amd: 'vue',
-        root: 'vue',
+        root: 'Vue',
     },
-    'vue-class-component': {
-        commonjs: 'vue-class-component',
-        commonjs2: 'vue-class-component',
-        amd: 'vue-class-component',
-        root: 'vue-class-component',
-    },
-};
+    // 'vue-class-component': {
+    //     commonjs: 'vue-class-component',
+    //     commonjs2: 'vue-class-component',
+    //     amd: 'vue-class-component',
+    //     root: 'vue-class-component',
+    // },
+}; // 忽略打包文件
 
 module.exports = merge(webpackConfigBase, {
     mode: 'production',
@@ -73,11 +73,12 @@ module.exports = merge(webpackConfigBase, {
     output: {
         // todo
         // 图片打包后的路径存在问题
-        publicPath: './',
+        // publicPath: './',
         path: path.resolve(__dirname, '../dist'),
         filename: 'vue-tools.min.js',
-        library: 'vue-tools',
+        library: 'VueTools',
         libraryTarget: 'umd',
+        libraryExport: 'default',
     },
     optimization: {
         minimizer: [

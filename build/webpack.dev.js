@@ -9,7 +9,7 @@ module.exports = merge(webpackConfigBase, {
     // devtool: "eval-cheap-module-source-map",
     entry: {
         main: './examples/main.ts',
-        vendors: ['vue', 'vue-router'],
+        // vendors: ['vue', 'vue-router'],
     },
     devtool: 'cheap-source-map',
     devServer: {
@@ -36,4 +36,27 @@ module.exports = merge(webpackConfigBase, {
         }),
         new webpack.HotModuleReplacementPlugin(),
     ],
+    // todo 缓存组优化
+    // 已提高构建速度
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            // cacheGroups: {
+            //     vendor: {
+            //         priority: 1,
+            //         name: 'vendor',
+            //         test: /node_modules/,
+            //         chunks: 'initial',
+            //         minSize: 0,
+            //         minChunks: 1,
+            //     },
+            //     common: {
+            //         chunks: 'initial',
+            //         name: 'common',
+            //         minSize: 100,
+            //         minChunks: 3,
+            //     },
+            // },
+        },
+    },
 });
