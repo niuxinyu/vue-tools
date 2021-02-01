@@ -1,7 +1,9 @@
 import Vue, { CreateElement } from 'vue';
+import { noop } from '@/libs/tools';
 import Preview from './preview.vue';
 
 let PreviewInstance!: Preview;
+let container!: HTMLElement | void;
 
 function getNewInstance (properties?: any) {
     // eslint-disable-next-line no-underscore-dangle
@@ -19,7 +21,12 @@ function getNewInstance (properties?: any) {
     });
 
     const component = Instance.$mount();
-    document.body.appendChild(component.$el);
+    if (container && container !== document.documentElement) {
+        container.appendChild(component.$el);
+    }
+    else {
+        document.body.appendChild(component.$el);
+    }
     const previewInstance = (component.$children[0] as Preview);
     return previewInstance;
 }
@@ -45,6 +52,11 @@ Preview.instance = {
         }
         PreviewInstance = PreviewInstance || getNewInstance(_prop);
         PreviewInstance.handleToggleShow(true);
+    },
+    getContainer (callback?: () => HTMLElement | void) {
+        if (!callback) callback = noop;
+        container = callback();
+        return this;
     },
     close () {
         PreviewInstance = PreviewInstance || getNewInstance();

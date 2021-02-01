@@ -242,7 +242,6 @@ export default class Preview extends Vue {
             this.isError = true;
             throw new Error('The imgList must be a non-empty array. ');
         }
-
         // 当前数据是否有id
         this.isDataHasId = (newVal.length > 0 ? !!newVal[0].id : false);
         this.sourceImgList = newVal;
@@ -255,9 +254,12 @@ export default class Preview extends Vue {
             ...newVal,
             last,
         ];
-        this.sourceImgList.forEach((item: any) => {
-            item.id = getUniqueId();
-        });
+        
+        if (!this.isDataHasId) {
+            this.sourceImgList.forEach((item: any) => {
+                item.id = getUniqueId();
+            });
+        }
     }
 
     private handleClose () {

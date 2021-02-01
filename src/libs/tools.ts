@@ -79,3 +79,7 @@ export const getUniqueId = (len = 8): string => {
 
 // 简易深克隆
 export const simpleDeepClone = (source: any) => JSON.parse(JSON.stringify(source));
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function,@typescript-eslint/explicit-module-boundary-types
+export function noop () {
+}
