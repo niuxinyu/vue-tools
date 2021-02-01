@@ -5,18 +5,39 @@ import Preview from './preview.vue';
 let PreviewInstance!: Preview;
 let container!: HTMLElement | void;
 
+// 这种写法显然不行
+// 2021年2月1日12点57分
+// 有时间需要着重修改该组件创建和销毁得逻辑
 function getNewInstance (properties?: any) {
     // eslint-disable-next-line no-underscore-dangle
     const Instance = new Vue({
+        data: {
+            show: true,
+        },
         render (h: CreateElement) {
-            return h(Preview, {
-                props: {
-                    imgList: properties.imgList ? properties.imgList : [],
-                },
-                on: {
-                    change: properties.change ? properties.change : () => ({}),
-                },
-            });
+            const getPreviewVNode = () => {
+                if (this.show) {
+                    return (
+                        h(Preview, {
+                            props: {
+                                imgList: properties.imgList ? properties.imgList : [],
+                            },
+                            on: {
+                                change: properties.change ? properties.change : () => ({}),
+                                close: (value: boolean) => {
+                                    this.show = value;
+                                    PreviewInstance = null;
+                                },
+                            },
+                        })
+                    );
+                }
+                return null;
+            };
+
+            return h('div', {
+                class: 'vt-wrapper',
+            }, [getPreviewVNode()]);
         },
     });
 

@@ -69,7 +69,7 @@ import {
 import { css } from '@/libs/style';
 import { eventHandle } from '@/libs/dom';
 import { getUniqueId, simpleDeepClone, throttle } from '@/libs/tools';
-import { getNumber } from '@/libs/math';
+import { findMinimum, getNumber } from '@/libs/math';
 
 const TRANS = /translate3d\((\-?\d+)(px)?,\s?(\-?\d+)(px)?,\s?(\-?\d+)(px)?\)/;
 const ANIMATION = 'transform 200ms cubic-bezier(0.4, 0, 0.22, 1)'; // 动画
@@ -186,22 +186,17 @@ export default class Preview extends Vue {
         };
     }
 
-    // public beforeDestroy () {
-    //     console.log(4545);
-    //     // eventHandle.removeEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
-    // }
-
-
     @Watch('value')
     onValueChange (newVal: boolean, oldVal: boolean) {
         if (newVal !== oldVal) {
-            this.$nextTick(() => {
+            setTimeout(() => {
                 this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
                 this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
                 Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
                     eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
                 });
-            });
+                this.handleChangeImgWidth();
+            }, 100);
         }
     }
 
@@ -222,22 +217,21 @@ export default class Preview extends Vue {
         }, 1000);
     }
 
-    @Watch('imgList', { immediate: true })
-    onImgListChange (newVal: any[]) {
-        if (!Array.isArray(newVal) || newVal.length === 0) {
+    private _initial () {
+        if (!Array.isArray(this.imgList) || this.imgList.length === 0) {
             this.isError = true;
             throw new Error('The imgList must be a non-empty array. ');
         }
         // 当前数据是否有id
-        this.isDataHasId = (newVal.length > 0 ? !!newVal[0].id : false);
-        this.sourceImgList = newVal;
-        const first = simpleDeepClone(newVal[newVal.length - 1]);
-        const last = simpleDeepClone(newVal[0]);
+        this.isDataHasId = (this.imgList.length > 0 ? !!this.imgList[0].id : false);
+        this.sourceImgList = this.imgList;
+        const first = simpleDeepClone(this.imgList[this.imgList.length - 1]);
+        const last = simpleDeepClone(this.imgList[0]);
         first.id = getUniqueId();
         last.id = getUniqueId();
         this.cloneImgList = [
             first,
-            ...newVal,
+            ...this.imgList,
             last,
         ];
 
@@ -255,10 +249,10 @@ export default class Preview extends Vue {
         setTimeout(() => {
             if (!this.imgItemList || !this.imgItemList.length) {
                 this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
-                Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
-                    eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-                });
             }
+            Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
+                eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+            });
             if (this.previewWrapperClientWidth === 0) {
                 this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
             }
@@ -266,10 +260,16 @@ export default class Preview extends Vue {
         });
     }
 
+    private mounted () {
+        this.$nextTick(() => {
+            this._initial();
+        });
+    }
+
     private handleClose () {
-        this.shouldShow = false;
         this.$emit('input', false);
         this.$emit('close', false);
+        this.shouldShow = false;
     }
 
     private getCurrentImgElement (params: any) {
@@ -327,15 +327,17 @@ export default class Preview extends Vue {
     }
 
     private handleChangeImgWidth () {
+        // 如果 imgItemList 为空说明还未初始化
+        if (this.imgItemList.length === 0) return;
         if (!this.currentImgElement) this.currentImgElement = this.imgItemList[this.currentIndex];
         if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) < 100) {
             this.imgItemList.forEach((element: HTMLImageElement) => {
-                element.style.width = (this.previewWrapperClientWidth - 200) + 'px';
+                element.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, element.naturalWidth) + 'px';
             });
         }
         if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) > 100) {
             this.imgItemList.forEach((element: HTMLImageElement) => {
-                element.style.width = (this.previewWrapperClientWidth - 200) + 'px';
+                element.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, element.naturalWidth) + 'px';
             });
         }
     }

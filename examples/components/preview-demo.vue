@@ -6,11 +6,11 @@
         </div>
         <div class="right">
             右侧布局
+            <Preview
+                v-model="shouldShow"
+                :img-list="imgList"
+            ></Preview>
         </div>
-        <!--        <Preview-->
-        <!--            v-model="shouldShow"-->
-        <!--            :img-list="imgList"-->
-        <!--        ></Preview>-->
         <button @click="handleShowPreview">点击图片预览</button>
     </div>
 </template>
@@ -53,10 +53,10 @@ export default class PreviewDemo extends Vue {
         //         console.log(params);
         //     }
         // });
-        this.$preview.getContainer(() => document.querySelector('.right'))
-            .open({
-                imgList: this.imgList
-            });
+        // this.$preview.getContainer(() => document.querySelector('.right'))
+        //     .open({
+        //         imgList: this.imgList
+        //     });
     }
 
     private handleClose () {
