@@ -186,25 +186,11 @@ export default class Preview extends Vue {
         };
     }
 
-    public mounted () {
-        // 在下一次 eventloop 中取dom
-        setTimeout(() => {
-            eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
-            eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
-            eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
-            eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
-            eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
-            if (!this.imgItemList || !this.imgItemList.length) {
-                this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
-                Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
-                    eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-                });
-            }
-            if (this.previewWrapperClientWidth === 0) {
-                this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
-            }
-        });
-    }
+    // public beforeDestroy () {
+    //     console.log(4545);
+    //     // eventHandle.removeEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
+    // }
+
 
     @Watch('value')
     onValueChange (newVal: boolean, oldVal: boolean) {
@@ -254,12 +240,30 @@ export default class Preview extends Vue {
             ...newVal,
             last,
         ];
-        
+
         if (!this.isDataHasId) {
             this.sourceImgList.forEach((item: any) => {
                 item.id = getUniqueId();
             });
         }
+        eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
+        eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
+        eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
+        eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
+        eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
+        // 在下一次 eventloop 中取dom
+        setTimeout(() => {
+            if (!this.imgItemList || !this.imgItemList.length) {
+                this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
+                Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
+                    eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+                });
+            }
+            if (this.previewWrapperClientWidth === 0) {
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
+            }
+            this.handleChangeImgWidth();
+        });
     }
 
     private handleClose () {
@@ -320,6 +324,20 @@ export default class Preview extends Vue {
 
     private handleBoundaryPrev () {
         this.currentIndex <= 0 && (this.currentIndex = this.sourceImgList.length);
+    }
+
+    private handleChangeImgWidth () {
+        if (!this.currentImgElement) this.currentImgElement = this.imgItemList[this.currentIndex];
+        if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) < 100) {
+            this.imgItemList.forEach((element: HTMLImageElement) => {
+                element.style.width = (this.previewWrapperClientWidth - 200) + 'px';
+            });
+        }
+        if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) > 100) {
+            this.imgItemList.forEach((element: HTMLImageElement) => {
+                element.style.width = (this.previewWrapperClientWidth - 200) + 'px';
+            });
+        }
     }
 
     private handleTransitionend () {
@@ -434,15 +452,11 @@ export default class Preview extends Vue {
         eventHandle.addEvent(document, 'mouseup', handleMouseUp);
     }
 
-    // public beforeDestroy () {
-    //     console.log(4545);
-    //     eventHandle.removeEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
-    // }
-
     private handleWindowResize (e: any) {
         const currentWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
         if (currentWrapperClientWidth < 550) return this.previewWrapperClientWidth = 550;
         this.previewWrapperClientWidth = currentWrapperClientWidth;
+        this.handleChangeImgWidth();
     }
 }
 </script>
