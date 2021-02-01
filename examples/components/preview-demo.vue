@@ -6,10 +6,10 @@
         </div>
         <div class="right">
             右侧布局
-            <Preview
-                v-model="shouldShow"
-                :img-list="imgList"
-            ></Preview>
+            <!--            <Preview-->
+            <!--                v-model="shouldShow"-->
+            <!--                :img-list="imgList"-->
+            <!--            ></Preview>-->
         </div>
         <button @click="handleShowPreview">点击图片预览</button>
     </div>
@@ -17,7 +17,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Close from '@/assets/close.png';
 
 @Component
 export default class PreviewDemo extends Vue {
@@ -47,12 +46,13 @@ export default class PreviewDemo extends Vue {
 
     private handleShowPreview () {
         this.shouldShow = true;
-        // this.$preview.open({
-        //     imgList: this.imgList,
-        //     change: (params: any) => {
-        //         console.log(params);
-        //     }
-        // });
+        this.$preview.open({
+            imgList: this.imgList,
+            change: (params: any) => {
+                console.log(params);
+            },
+            menuList: { leftRotate: false }
+        });
         // this.$preview.getContainer(() => document.querySelector('.right'))
         //     .open({
         //         imgList: this.imgList

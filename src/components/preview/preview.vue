@@ -26,19 +26,19 @@
                             {{ this.reallyIndex }} / {{ this.sourceImgList.length }}
                         </div>
                         <div class="menu">
-                            <div class="menu-item" title="缩小">
+                            <div v-if="minus" class="menu-item" title="缩小">
                                 <Icon type="minus" @click="scaleMinus"></Icon>
                             </div>
-                            <div class="menu-item" title="放大">
+                            <div v-if="plus" class="menu-item" title="放大">
                                 <Icon type="plus" @click="scaleAdd"></Icon>
                             </div>
-                            <div class="menu-item" title="重置">
+                            <div v-if="reset" class="menu-item" title="重置">
                                 <Icon type="reset" @click="handleResetImgStyle"></Icon>
                             </div>
-                            <div class="menu-item" title="左旋转">
+                            <div v-if="leftRotate" class="menu-item" title="左旋转">
                                 <Icon type="left-90" @click="handleRotate('left')"></Icon>
                             </div>
-                            <div class="menu-item" title="右旋转">
+                            <div v-if="rightRotate" class="menu-item" title="右旋转">
                                 <Icon type="right-90" @click="handleRotate('right')"></Icon>
                             </div>
                             <div class="menu-item" title="关闭" @click="handleClose">
@@ -86,6 +86,12 @@ export default class Preview extends Vue {
     @Prop({ default: () => ([]) }) private imgList!: any[];
 
     @Prop({ default: () => false }) private value!: boolean;
+
+    @Prop({ default: true }) private minus!: boolean;
+    @Prop({ default: true }) private plus!: boolean;
+    @Prop({ default: true }) private reset!: boolean;
+    @Prop({ default: true }) private leftRotate!: boolean;
+    @Prop({ default: true }) private rightRotate!: boolean;
 
     // 内部显示索引
     private currentIndex = 1;
@@ -328,7 +334,7 @@ export default class Preview extends Vue {
 
     private handleChangeImgWidth () {
         // 如果 imgItemList 为空说明还未初始化
-        if (this.imgItemList.length === 0) return;
+        if (typeof this.imgItemList === 'undefined' || this.imgItemList.length === 0) return;
         if (!this.currentImgElement) this.currentImgElement = this.imgItemList[this.currentIndex];
         if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) < 100) {
             this.imgItemList.forEach((element: HTMLImageElement) => {

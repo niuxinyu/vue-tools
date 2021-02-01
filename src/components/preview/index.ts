@@ -1,13 +1,14 @@
 import Vue, { CreateElement } from 'vue';
 import { noop } from '@/libs/tools';
 import Preview from './preview.vue';
+import { MenuList } from '../../../types/preview/preview';
 
 let PreviewInstance!: Preview;
 let container!: HTMLElement | void;
 
 // 这种写法显然不行
 // 2021年2月1日12点57分
-// 有时间需要着重修改该组件创建和销毁得逻辑
+// 有时间需要着重修改该组件创建和销毁的逻辑
 function getNewInstance (properties?: any) {
     // eslint-disable-next-line no-underscore-dangle
     const Instance = new Vue({
@@ -21,12 +22,16 @@ function getNewInstance (properties?: any) {
                         h(Preview, {
                             props: {
                                 imgList: properties.imgList ? properties.imgList : [],
+                                ...properties.menuList,
                             },
                             on: {
                                 change: properties.change ? properties.change : () => ({}),
                                 close: (value: boolean) => {
                                     this.show = value;
                                     PreviewInstance = null;
+                                    setTimeout(() => {
+                                        document.body.removeChild(document.querySelector('.vt-wrapper'));
+                                    }, 500);
                                 },
                             },
                         })
@@ -34,7 +39,6 @@ function getNewInstance (properties?: any) {
                 }
                 return null;
             };
-
             return h('div', {
                 class: 'vt-wrapper',
             }, [getPreviewVNode()]);
@@ -54,14 +58,16 @@ function getNewInstance (properties?: any) {
 
 Preview.instance = {
     open (properties: {
-        imgList: { url: string; id?: number }[]; change: () => ({
+        imgList: { url: string; id?: number }[];
+        change: () => ({
             id: number | string,
             actionType: string,
             currentIndex: number,
             imgUrl: string,
             scale: number,
             rotate: number,
-        })
+        });
+        menuList: MenuList
     }) {
         // eslint-disable-next-line no-underscore-dangle
         const _prop = {} as Record<string, any>;
@@ -70,6 +76,9 @@ Preview.instance = {
         }
         if (properties.change && typeof properties.change === 'function') {
             _prop.change = properties.change;
+        }
+        if (properties.menuList) {
+            _prop.menuList = properties.menuList;
         }
         PreviewInstance = PreviewInstance || getNewInstance(_prop);
         PreviewInstance.handleToggleShow(true);
