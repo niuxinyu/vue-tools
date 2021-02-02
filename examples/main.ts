@@ -4,8 +4,9 @@ import VueRouter from 'vue-router';
 // import $ from 'jquery';
 // import axios from 'axios';
 import App from './App.vue';
-import VueTools from '../src/index';
-// import VueTools from '../dist/vue-tools.min.js';
+// import VueTools from '../src/index';
+import VueTools from '../dist/vue-tools.min.js';
+import '../dist/css/main.css';
 import PreviewDemo from './components/preview-demo.vue';
 
 // console.log(axios);
