@@ -1,5 +1,5 @@
 <template>
-    <transition name="fade">
+    <transition name="vt-fade">
         <div
             v-if="value || shouldShow"
             :class="[prefixCls + 'img-preview']"
@@ -28,7 +28,7 @@
                         >
                     </div>
                 </div>
-                <transition name="fade">
+                <transition name="vt-fade">
                     <div v-show="isActionWrapperShow" :class="[prefixCls + 'action-wrapper']">
                         <div :class="prefixCls + 'page'">
                             {{ this.reallyIndex }} / {{ this.sourceImgList.length }}
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                 </transition>
-                <transition-group name="fade" tag="div">
+                <transition-group name="vt-fade" tag="div">
                     <div v-show="isActionWrapperShow" key="prev" :class="[prefixCls + 'prev']" title="上一张"
                          @click="handlePrev">
                         <Icon type="arrow-left"></Icon>
