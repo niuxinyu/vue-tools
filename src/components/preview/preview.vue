@@ -107,6 +107,9 @@ export default class Preview extends Vue {
     // 内部显示索引
     private currentIndex = 1;
 
+    // ？？？？？？？？？？
+    private togglePreview = 1;
+
     // 初始化 scale 值
     private scaleInit = 1;
 
@@ -148,6 +151,8 @@ export default class Preview extends Vue {
     // 标记当前是否为错误状态
     private isError = false;
 
+    /*****************UI*************************/
+
     public get getStyle () {
         return {
             width: `${this.previewWrapperClientWidth}px`,
@@ -159,6 +164,7 @@ export default class Preview extends Vue {
 
     public get getPreviewWrapper () {
         return {
+            // todo
             transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
             'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
             width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
@@ -203,22 +209,7 @@ export default class Preview extends Vue {
         this.shouldShow = value;
     }
 
-    @Emit()
-    change () {
-        // 当前图片的可能用到的值
-        this.reallyIndex = this.currentIndex;
-        return {
-            id: this.sourceImgList[this.currentIndex - 1].id,
-            actionType: this.actionType,
-            currentIndex: this.currentIndex - 1,
-            imgUrl: this.imgItemList[this.currentIndex - 1].getAttribute('src'),
-            scale: this.scaleInit,
-            rotate: this.rotate,
-        };
-    }
-
-    private actionWrapperTimer: any = 0;
-
+    /*************************watch********************************/
     @Watch('value')
     onValueChange (newVal: boolean, oldVal: boolean) {
         if (newVal !== oldVal) {
@@ -238,23 +229,23 @@ export default class Preview extends Vue {
         }
     }
 
-    private handleShowActionWrapper () {
-        if (this.actionWrapperTimer) {
-            clearTimeout(this.actionWrapperTimer);
-            this.actionWrapperTimer = null;
-        }
-        if (!this.isActionWrapperShow) this.isActionWrapperShow = true;
+    /***********emit*********************************/
+
+    @Emit()
+    change () {
+        // 当前图片的可能用到的值
+        this.reallyIndex = this.currentIndex;
+        return {
+            id: this.sourceImgList[this.currentIndex - 1].id,
+            actionType: this.actionType,
+            currentIndex: this.currentIndex - 1,
+            imgUrl: this.imgItemList[this.currentIndex - 1].getAttribute('src'),
+            scale: this.scaleInit,
+            rotate: this.rotate,
+        };
     }
 
-    private handleHiddenActionWrapper () {
-        if (this.actionWrapperTimer) return;
-        this.actionWrapperTimer = setTimeout(() => {
-            this.isActionWrapperShow = false;
-            clearTimeout(this.actionWrapperTimer);
-            this.actionWrapperTimer = null;
-        }, 1000);
-    }
-
+    /***********************lifecycle*************************/
     /*****************initial**********************/
 
     private _initialImgList () {
@@ -270,6 +261,17 @@ export default class Preview extends Vue {
     }
 
     private _initialCloneImgList () {
+        // todo
+        // reallyIndex 总是比索引大1
+        // const first = simpleDeepClone(this.imgList[this.imgList.length - 1]);
+        // const last = simpleDeepClone(this.imgList[this.reallyIndex - 1]);
+        // first.id = getUniqueId();
+        // last.id = getUniqueId();
+        // this.cloneImgList = [
+        //     first,
+        //     this.imgList[this.currentIndex - 1],
+        //     last
+        // ];
         const first = simpleDeepClone(this.imgList[this.imgList.length - 1]);
         const last = simpleDeepClone(this.imgList[0]);
         first.id = getUniqueId();
@@ -329,16 +331,11 @@ export default class Preview extends Vue {
         this._initial();
     }
 
+    /*****************************methods******************************/
     private handleClose () {
         this.$emit('input', false);
         this.$emit('close', false);
         this.shouldShow = false;
-    }
-
-    private getCurrentImgElement (params: any) {
-        if (typeof params === 'number') {
-            this.currentImgElement = this.imgItemList[this.currentIndex];
-        }
     }
 
     private scaleAdd () {
@@ -371,13 +368,6 @@ export default class Preview extends Vue {
         }
     }
 
-    private handleResetImgStyle () {
-        if (!this.currentImgElement) return;
-        this.currentImgElement.style.marginLeft = this.currentImgElement.style.marginTop = '0';
-        this.scaleInit = 1;
-        this.rotate = 0;
-    }
-
     //  边界处理
     private handleBoundaryNext () {
         if (this.currentIndex >= this.cloneImgList.length - 1) {
@@ -386,7 +376,61 @@ export default class Preview extends Vue {
     }
 
     private handleBoundaryPrev () {
+        // 切换url
+        /**
+         * 动画完成之后
+         * cloneImgList 第一项 指向当前前一张
+         * cloneImgList 第二项 置换为 当前项
+         * cloneImgList 第三项 指向 当前的后一张
+         * currentIndex 此时已经减去一了
+         * **/
+        // this.cloneImgList[1].url =  this.cloneImgList[0].url;
+        // this.togglePreview = 1;
         this.currentIndex <= 0 && (this.currentIndex = this.sourceImgList.length);
+        // this.cloneImgList[0].url = this.sourceImgList[this.currentIndex - 1];
+        // this.cloneImgList
+        // this.cloneImgList[2].url = this.cloneImgList[1].url;
+        // this.cloneImgList[1].url = this.cloneImgList[0].url;
+        // this.cloneImgList[0].url = this.sourceImgList[this.currentIndex - 1].url;
+    }
+
+    private handlePrev () {
+        if (!this.canToggle) return;
+        this.canToggle = false;
+        this.actionType = 'prev';
+        this.currentIndex -= 1;
+        this.togglePreview -= 1;
+
+        this.handleResetImgStyle();
+        this.handleRestartAnimation();
+        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
+        eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
+    }
+
+    private handleNext () {
+        if (!this.canToggle) return;
+        this.canToggle = false;
+        this.actionType = 'next';
+        this.currentIndex += 1;
+
+        this.handleResetImgStyle();
+        this.handleRestartAnimation();
+        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
+        eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
+    }
+
+    /************************************utils******************************************/
+    private handleResetImgStyle () {
+        if (!this.currentImgElement) return;
+        this.currentImgElement.style.marginLeft = this.currentImgElement.style.marginTop = '0';
+        this.scaleInit = 1;
+        this.rotate = 0;
+    }
+
+    private getCurrentImgElement (params: any) {
+        if (typeof params === 'number') {
+            this.currentImgElement = this.imgItemList[this.currentIndex];
+        }
     }
 
     private handleChangeImgWidth (img: HTMLImageElement) {
@@ -410,36 +454,13 @@ export default class Preview extends Vue {
         }
     }
 
+    // 动画
     private handleTransitionend () {
         this.handleCloneAnimation();
         this.actionType === 'prev' ? this.handleBoundaryPrev() : this.handleBoundaryNext();
         this.canToggle = true;
         if (this.rotate === -360 || this.rotate === 360) this.rotate = 0;
         this.change();
-    }
-
-    private handlePrev () {
-        if (!this.canToggle) return;
-        this.canToggle = false;
-        this.actionType = 'prev';
-        this.currentIndex -= 1;
-
-        this.handleResetImgStyle();
-        this.handleRestartAnimation();
-        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
-        eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
-    }
-
-    private handleNext () {
-        if (!this.canToggle) return;
-        this.canToggle = false;
-        this.actionType = 'next';
-        this.currentIndex += 1;
-
-        this.handleResetImgStyle();
-        this.handleRestartAnimation();
-        this.previewWrapper = document.querySelector('.vt-preview-wrapper');
-        eventHandle.addEvent(this.previewWrapper, 'transitionend', this.handleTransitionend);
     }
 
     private handleCloneAnimation () {
@@ -461,7 +482,29 @@ export default class Preview extends Vue {
         }
     }
 
+    private actionWrapperTimer: any = 0;
+
+    private handleShowActionWrapper (event: MouseEvent) {
+        event.preventDefault();
+        if (this.actionWrapperTimer) {
+            clearTimeout(this.actionWrapperTimer);
+            this.actionWrapperTimer = null;
+        }
+        if (!this.isActionWrapperShow) this.isActionWrapperShow = true;
+    }
+
+    private handleHiddenActionWrapper (event: MouseEvent) {
+        event.preventDefault();
+        if (this.actionWrapperTimer) return;
+        this.actionWrapperTimer = setTimeout(() => {
+            this.isActionWrapperShow = false;
+            clearTimeout(this.actionWrapperTimer);
+            this.actionWrapperTimer = null;
+        }, 1000);
+    }
+
     private mouseHandle (event: Event) {
+        event.preventDefault();
         if (!this.currentImgElement && event.target) {
             this.currentImgElement = (event.target as HTMLImageElement);
         }

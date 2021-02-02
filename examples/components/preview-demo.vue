@@ -45,10 +45,10 @@ export default class PreviewDemo extends Vue {
             id: 4,
             url: 'https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg!0x0.webp'
         },
-        // {
-        //     id: 2,
-        //     url: 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1819216937,2118754409&fm=26&gp=0.jpg',
-        // },
+        {
+            id: 2,
+            url: 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1819216937,2118754409&fm=26&gp=0.jpg',
+        },
         // {
         //     id: 3,
         //     url: 'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2005235653,1742582269&fm=26&gp=0.jpg',
@@ -82,7 +82,7 @@ export default class PreviewDemo extends Vue {
 <style lang="less" scoped>
 .left {
     width: 50%;
-    height: 500px;
+    height: 1000px;
     background: red;
     display: block;
     float: left;
