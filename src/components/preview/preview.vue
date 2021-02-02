@@ -232,6 +232,10 @@ export default class Preview extends Vue {
                 });
             });
         }
+        if (!newVal) {
+            this.currentIndex = 1;
+            this.reallyIndex = 1;
+        }
     }
 
     private handleShowActionWrapper () {
