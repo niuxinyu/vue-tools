@@ -1,6 +1,6 @@
 {
     "name": "@niu_/vue-tools",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "vue tools",
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack serve --config build/webpack.dev.js",

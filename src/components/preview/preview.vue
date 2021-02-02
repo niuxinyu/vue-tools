@@ -282,13 +282,16 @@ export default class Preview extends Vue {
     }
 
     private _initialRegisterEvent () {
-        eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
-        eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
+        // 如果制定了挂载的dom 那么需要将这些事件绑定到挂载节点上。。。
         if (Preview.container) {
+            eventHandle.addEvent(Preview.container, 'mousewheel', throttle(this.mouseHandle, 100));
+            eventHandle.addEvent(Preview.container, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
             eventHandle.addEvent(Preview.container, 'mouseenter', this.handleShowActionWrapper);
             eventHandle.addEvent(Preview.container, 'mouseleave', this.handleHiddenActionWrapper);
         }
         else {
+            eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
+            eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
             eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
             eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
         }
