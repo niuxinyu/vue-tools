@@ -1,15 +1,25 @@
 <template>
     <div>
-        <h1>实例测试</h1>
+        <h1 style="margin: 15px 0;">实例测试</h1>
+        <!--        <Preview-->
+        <!--            v-model="shouldShow"-->
+        <!--            :img-list="imgList"-->
+        <!--        ></Preview>-->
         <div class="left">
             左侧布局
         </div>
         <div class="right">
             右侧布局
-            <!--            <Preview-->
-            <!--                v-model="shouldShow"-->
-            <!--                :img-list="imgList"-->
-            <!--            ></Preview>-->
+            <h1>第一行</h1>
+            <h1>第一行</h1>
+            <h1>第一行</h1>
+            <h1>第一行</h1>
+            <h1>第一行</h1>
+            <h1>第一行</h1>
+            <Preview
+                v-model="shouldShow"
+                :img-list="imgList"
+            ></Preview>
         </div>
         <button @click="handleShowPreview">点击图片预览</button>
     </div>
@@ -46,13 +56,13 @@ export default class PreviewDemo extends Vue {
 
     private handleShowPreview () {
         this.shouldShow = true;
-        this.$preview.open({
-            imgList: this.imgList,
-            change: (params: any) => {
-                console.log(params);
-            },
-            menuList: { leftRotate: false }
-        });
+        // this.$preview.getContainer(() => (document.querySelector('.right') as HTMLElement)).open({
+        //     imgList: this.imgList,
+        //     change: (params: any) => {
+        //         console.log(params);
+        //     },
+        //     menuList: { leftRotate: false }
+        // });
         // this.$preview.getContainer(() => document.querySelector('.right'))
         //     .open({
         //         imgList: this.imgList

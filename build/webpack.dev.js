@@ -36,6 +36,30 @@ module.exports = merge(webpackConfigBase, {
         }),
         new webpack.HotModuleReplacementPlugin(),
     ],
+    // externals: [
+    //     {
+    //         // jquery: 'jQuery',
+    //         // axios: 'axios',
+    //         axios: {
+    //             // commonjs2: 'axios',
+    //             // commonjs: 'axios',
+    //             // amd: 'axios',
+    //             root: 'axios',
+    //         },
+    //         // jquery: {
+    //         //     commonjs: 'jquery',
+    //         //     commonjs2: 'jquery',
+    //         //     amd: 'jquery',
+    //         //     root: 'jQuery',
+    //         // },
+    //         // vue: {
+    //         //     commonjs: 'vue',
+    //         //     commonjs2: 'vue',
+    //         //     amd: 'vue',
+    //         //     root: 'Vue',
+    //         // },
+    //     },
+    // ],
     // todo 缓存组优化
     // 已提高构建速度
     optimization: {

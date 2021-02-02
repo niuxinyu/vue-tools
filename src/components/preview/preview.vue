@@ -1,8 +1,16 @@
 <template>
     <transition name="fade">
-        <div v-if="value || shouldShow" :class="[prefixCls + 'img-preview']">
-            <div :class="[prefixCls + 'bg']"></div>
-            <div :class="[prefixCls + 'scroll-wrapper']">
+        <div
+            v-if="value || shouldShow"
+            :class="[prefixCls + 'img-preview']"
+            :style="getImgPreview"
+        >
+            <div
+                :class="[prefixCls + 'bg']"
+            ></div>
+            <div
+                :class="[prefixCls + 'scroll-wrapper']"
+            >
                 <div
                     :style="getPreviewWrapper"
                     :class="[prefixCls + 'wrapper']"
@@ -81,6 +89,9 @@ export default class Preview extends Vue {
     // 保存实例
     static instance: any;
 
+    // 保存挂载的根实例
+    static container: HTMLElement | void;
+
     private prefixCls = prefixCls;
 
     @Prop({ default: () => ([]) }) private imgList!: any[];
@@ -143,7 +154,18 @@ export default class Preview extends Vue {
         };
     }
 
-    public get getImgStyle () {
+    // 当前是否正在拖动图片
+    private isGrabbing = false;
+
+    public get getPreviewWrapper () {
+        return {
+            transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
+            'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
+            width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
+        };
+    }
+
+    private get getImgStyle () {
         return (index: number) => {
             if (this.currentIndex === index) {
                 return {
@@ -151,6 +173,7 @@ export default class Preview extends Vue {
                     'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
                     'margin-left': '0px',
                     'margin-top': '0px',
+                    cursor: this.isGrabbing ? 'grabbing' : 'grab'
                 };
             }
             return {
@@ -158,8 +181,20 @@ export default class Preview extends Vue {
                 'transition-duration': '0ms',
                 'margin-left': '0px',
                 'margin-top': '0px',
+                cursor: this.isGrabbing ? 'grabbing' : 'grab'
             };
         };
+    }
+
+    private get getImgPreview () {
+        if (this.value) {
+            return {
+                'position': 'fixed',
+                left: 0,
+                top: 0,
+            };
+        }
+        return {};
     }
 
     private isActionWrapperShow = true; // 当前操作菜单是否展示
@@ -184,25 +219,18 @@ export default class Preview extends Vue {
 
     private actionWrapperTimer: any = 0;
 
-    public get getPreviewWrapper () {
-        return {
-            transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
-            'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
-            width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
-        };
-    }
-
     @Watch('value')
     onValueChange (newVal: boolean, oldVal: boolean) {
         if (newVal !== oldVal) {
-            setTimeout(() => {
+            // 挂载之后获取宽度
+            this.$nextTick(() => {
                 this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
                 this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
                 Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
                     eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+                    this.handleChangeImgWidth(item);
                 });
-                this.handleChangeImgWidth();
-            }, 100);
+            });
         }
     }
 
@@ -223,14 +251,21 @@ export default class Preview extends Vue {
         }, 1000);
     }
 
-    private _initial () {
+    /*****************initial**********************/
+
+    private _initialImgList () {
         if (!Array.isArray(this.imgList) || this.imgList.length === 0) {
             this.isError = true;
-            throw new Error('The imgList must be a non-empty array. ');
+            throw new Error('The properties imgList must be a no-empty array.');
         }
-        // 当前数据是否有id
-        this.isDataHasId = (this.imgList.length > 0 ? !!this.imgList[0].id : false);
-        this.sourceImgList = this.imgList;
+    }
+
+    private _initialImgListHasId () {
+        // 这里只对第一项做判断
+        this.isDataHasId = !!this.imgList[0].id;
+    }
+
+    private _initialCloneImgList () {
         const first = simpleDeepClone(this.imgList[this.imgList.length - 1]);
         const last = simpleDeepClone(this.imgList[0]);
         first.id = getUniqueId();
@@ -240,36 +275,51 @@ export default class Preview extends Vue {
             ...this.imgList,
             last,
         ];
+    }
 
+    private _initialRegisterEvent () {
+        eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
+        eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
+        if (Preview.container) {
+            eventHandle.addEvent(Preview.container, 'mouseenter', this.handleShowActionWrapper);
+            eventHandle.addEvent(Preview.container, 'mouseleave', this.handleHiddenActionWrapper);
+        }
+        else {
+            eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
+            eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
+        }
+        eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
+    }
+
+    private _initial () {
+        // 当前数据是否有id
         if (!this.isDataHasId) {
             this.sourceImgList.forEach((item: any) => {
                 item.id = getUniqueId();
             });
         }
-        eventHandle.addEvent(document, 'mousewheel', throttle(this.mouseHandle, 100));
-        eventHandle.addEvent(document, 'DOMMouseScroll', throttle(this.mouseHandle, 100));
-        eventHandle.addEvent(document, 'mouseenter', this.handleShowActionWrapper);
-        eventHandle.addEvent(document, 'mouseleave', this.handleHiddenActionWrapper);
-        eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
         // 在下一次 eventloop 中取dom
         setTimeout(() => {
-            if (!this.imgItemList || !this.imgItemList.length) {
-                this.imgItemList = (document.querySelectorAll('.vt-preview-img'));
-            }
-            Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
-                eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-            });
             if (this.previewWrapperClientWidth === 0) {
-                this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
+                this.previewWrapperClientWidth = getNumber(document.querySelector('.' + prefixCls + 'scroll-wrapper')?.clientWidth);
             }
-            this.handleChangeImgWidth();
+            if (!this.imgItemList || !this.imgItemList.length) {
+                this.imgItemList = document.querySelectorAll('.' + prefixCls + 'img');
+            }
+            this.imgItemList.forEach((item: HTMLImageElement) => {
+                eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+                this.handleChangeImgWidth(item);
+            });
         });
     }
 
-    private mounted () {
-        this.$nextTick(() => {
-            this._initial();
-        });
+    private created () {
+        this._initialImgList();
+        this._initialImgListHasId();
+        this.sourceImgList = this.imgList;
+        this._initialCloneImgList();
+        this._initialRegisterEvent();
+        this._initial();
     }
 
     private handleClose () {
@@ -332,19 +382,24 @@ export default class Preview extends Vue {
         this.currentIndex <= 0 && (this.currentIndex = this.sourceImgList.length);
     }
 
-    private handleChangeImgWidth () {
-        // 如果 imgItemList 为空说明还未初始化
-        if (typeof this.imgItemList === 'undefined' || this.imgItemList.length === 0) return;
-        if (!this.currentImgElement) this.currentImgElement = this.imgItemList[this.currentIndex];
-        if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) < 100) {
-            this.imgItemList.forEach((element: HTMLImageElement) => {
-                element.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, element.naturalWidth) + 'px';
-            });
+    private handleChangeImgWidth (img: HTMLImageElement) {
+        // 重置图片的尺寸
+        const changeImgWidth = () => {
+            if (((this.previewWrapperClientWidth - img.clientWidth) / 2 | 0) < 100) {
+                img.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, img.naturalWidth) + 'px';
+            }
+            if (((this.previewWrapperClientWidth - img.clientWidth) / 2 | 0) > 100) {
+                img.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, img.naturalWidth) + 'px';
+            }
+        };
+
+        if (img.complete) {
+            changeImgWidth();
         }
-        if (((this.previewWrapperClientWidth - this.currentImgElement.clientWidth) / 2 | 0) > 100) {
-            this.imgItemList.forEach((element: HTMLImageElement) => {
-                element.style.width = findMinimum((this.previewWrapperClientWidth - 200), 100, element.naturalWidth) + 'px';
-            });
+        else {
+            img.onload = () => {
+                changeImgWidth();
+            };
         }
     }
 
@@ -428,6 +483,7 @@ export default class Preview extends Vue {
         // console.log(e);
         e.target && (this.currentImgElement = (e.target as HTMLImageElement));
         e.preventDefault();
+        this.isGrabbing = true;
         let diffX: number;
         let diffY: number;
         const transPos = TRANS.exec(this.currentImgElement.style.transform);
@@ -454,6 +510,7 @@ export default class Preview extends Vue {
         function handleMouseUp (e: MouseEvent) {
             eventHandle.removeEvent(document, 'mousemove', handleMouseMove);
             eventHandle.removeEvent(document, 'mouseup', handleMouseUp);
+            self.isGrabbing = false;
         }
 
         eventHandle.addEvent(document, 'mousemove', handleMouseMove);
@@ -462,9 +519,11 @@ export default class Preview extends Vue {
 
     private handleWindowResize (e: any) {
         const currentWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
-        if (currentWrapperClientWidth < 550) return this.previewWrapperClientWidth = 550;
+        // if (currentWrapperClientWidth < 550) return this.previewWrapperClientWidth = 550;
         this.previewWrapperClientWidth = currentWrapperClientWidth;
-        this.handleChangeImgWidth();
+        this.imgItemList.forEach((item: HTMLImageElement) => {
+            this.handleChangeImgWidth(item);
+        });
     }
 }
 </script>

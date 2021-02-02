@@ -7,6 +7,7 @@ export function posVal (n: number): number {
 }
 
 export function findMinimum (n: number, min: number, max: number): number {
+    // if (min === 0 || max === 0) return n;
     if (n < min) return min;
     if (n > max) return max;
     return n;
