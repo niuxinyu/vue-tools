@@ -189,15 +189,8 @@ export default class Preview extends Vue {
     }
 
     private get getPreviewWrapper () {
-        if (!this.isShortImgList) {
-            return {
-                transform: `translate3d(${(-(this.togglePreview) * this.previewWrapperClientWidth)}px, 0, 0)`,
-                'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
-                width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
-            };
-        }
         return {
-            transform: `translate3d(${(-(this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
+            transform: `translate3d(${(-(!this.isShortImgList ? this.togglePreview : this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
             'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
             width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
         };
@@ -205,28 +198,17 @@ export default class Preview extends Vue {
 
     private get getImgStyle () {
         return (index: number) => {
-            if (!this.isShortImgList) {
-                if (index === 1) {
-                    return {
-                        width: this.imgStyleWidth + 'px',
-                        transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
-                        'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
-                        'margin-left': '0px',
-                        'margin-top': '0px',
-                        cursor: this.isGrabbing ? 'grabbing' : 'grab',
-                    };
-                }
+            if (!this.isShortImgList && index === 1) {
                 return {
                     width: this.imgStyleWidth + 'px',
-                    transform: 'scale(1) rotate(0deg)',
-                    'transition-duration': '0ms',
+                    transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
+                    'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
                     'margin-left': '0px',
                     'margin-top': '0px',
                     cursor: this.isGrabbing ? 'grabbing' : 'grab',
                 };
             }
-
-            if (this.currentIndex === index) {
+            if (this.isShortImgList && this.currentIndex === index) {
                 return {
                     width: this.imgStyleWidth + 'px',
                     transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
@@ -244,7 +226,6 @@ export default class Preview extends Vue {
                 'margin-top': '0px',
                 cursor: this.isGrabbing ? 'grabbing' : 'grab',
             };
-
         };
     }
 
@@ -280,16 +261,18 @@ export default class Preview extends Vue {
             });
         }
         // v-model 隐藏后
-        if (this.isShortImgList && !newVal) {
-            removeClass(document.documentElement, 'vt-preview-open');
-            this.currentIndex = 1;
-            this.reallyIndex = 1;
-        }
-        if (!this.isShortImgList && !newVal) {
-            removeClass(document.documentElement, 'vt-preview-open');
-            this.currentIndex = 0;
-            this.reallyIndex = 1;
-            this.handleGetCloneImgList();
+        if (!newVal) {
+            if (this.isShortImgList) {
+                removeClass(document.documentElement, 'vt-preview-open');
+                this.currentIndex = 1;
+                this.reallyIndex = 1;
+            }
+            if (!this.isShortImgList) {
+                this.currentIndex = 0;
+                this.reallyIndex = 1;
+                this.handleGetCloneImgList();
+            }
+            this.handleResetImgStyle();
         }
     }
 
@@ -310,7 +293,6 @@ export default class Preview extends Vue {
                 rotate: this.rotate,
             };
         }
-
         this.reallyIndex = this.currentIndex + 1;
         const currentItem = this.sourceImgList[this.currentIndex];
         return {
@@ -321,14 +303,6 @@ export default class Preview extends Vue {
             scale: this.scaleInit,
             rotate: this.rotate,
         };
-        // return {
-        //     id: this.sourceImgList[this.currentIndex - 1].id,
-        //     actionType: this.actionType,
-        //     currentIndex: this.currentIndex - 1,
-        //     imgUrl: this.imgItemList[this.currentIndex - 1].getAttribute('src'),
-        //     scale: this.scaleInit,
-        //     rotate: this.rotate,
-        // };
     }
 
     private _initialImgListHasId () {
