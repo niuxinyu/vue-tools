@@ -61,3 +61,28 @@ export const css = (
             }
         };
     }());
+
+// 处理类名
+export function getClassList (element: HTMLElement): string {
+    return (' ' + (element.classList || '') + ' ').replace(/\s+/gi, ' ');
+}
+
+export function hasClass (classList: string | HTMLElement, className: string): boolean {
+    const list = typeof classList === 'string' ? classList : getClassList(classList as HTMLElement);
+    return list.indexOf(' ' + className + ' ') >= 0;
+}
+
+export function addClass (element: HTMLElement, className: string): void {
+    const oldClassList = getClassList(element),
+        newClassList = oldClassList + className;
+    if (hasClass(oldClassList, className)) return;
+    element.className = newClassList.substring(1);
+}
+
+export function removeClass (element: HTMLElement, className: string): void {
+    let newClassList = '';
+    const oldClassList = getClassList(element);
+    if (!hasClass(element, className)) return;
+    newClassList = oldClassList.replace(' ' + className + ' ', ' ');
+    element.className = newClassList.substring(1, newClassList.length - 1);
+}

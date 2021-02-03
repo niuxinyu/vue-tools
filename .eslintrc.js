@@ -4,7 +4,7 @@ module.exports = {
         browser: true,
         es6: true,
     },
-    // parser: 'vue-eslint-parser',
+    parser: 'vue-eslint-parser',
     extends: [
         'plugin:vue/essential',
         'airbnb-base',
@@ -67,11 +67,20 @@ module.exports = {
         'prefer-rest-params': 0,
         // 不限制行的最长字符
         'max-len': 0,
-        // ts
-        // 允许在ts内使用var和require
-        '@typescript-eslint/no-var-requires': 0,
-        '@typescript-eslint/ban-ts-ignore': 0,
-        '@typescript-eslint/camelcase': 0,
+        // 允许字符串拼接
+        'prefer-template': 0,
+        // 允许连续生命变量
+        'one-var': 0,
+        // 允许下划线命名函数
+        'no-underscore-dangle': 0,
+        // 允许可能是错误的表达式
+        'no-unused-expressions': 0,
+        // 允许连接变量赋值
+        'no-multi-assign': 0,
+        // 允许位运算
+        'no-bitwise': 0,
+        // switch 可以不使用default
+        'default-case': 0,
         // 更多规则 https://cn.eslint.org/docs/rules/
         // 解决
         // ESLint: Missing file extension "ts" for "./components/preview/index"(import/extensions)
@@ -80,6 +89,17 @@ module.exports = {
         'padded-blocks': 'off',
         // 不要检查正则中多余的转义符
         'no-useless-escape': 'off',
+        // 允许局部变量名字覆盖全局变量名
+        'no-shadow': 0,
+        // ts
+        // 允许在ts内使用var和require
+        '@typescript-eslint/no-var-requires': 0,
+        '@typescript-eslint/ban-ts-ignore': 0,
+        '@typescript-eslint/camelcase': 0,
+        // 允许为this设置别名
+        '@typescript-eslint/no-this-alias': 0,
+        // 不强制要求函数必须写返回值
+        '@typescript-eslint/explicit-module-boundary-types': 0,
     },
     settings: {
         'import/resolver': {

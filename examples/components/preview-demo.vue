@@ -16,11 +16,11 @@
             <h1>第一行</h1>
             <h1>第一行</h1>
             <h1>第一行</h1>
-            <!--            <Preview-->
-            <!--                v-model="shouldShow"-->
-            <!--                :img-list="imgList"-->
-            <!--                @change="handleClose"-->
-            <!--            ></Preview>-->
+            <Preview
+                v-model="shouldShow"
+                :img-list="imgList"
+                @change="handleClose"
+            ></Preview>
         </div>
         <button @click="handleShowPreview">点击图片预览</button>
     </div>
@@ -28,46 +28,56 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import One from '../assets/preview/1.jpg';
+import Two from '../assets/preview/2.jpg';
+import Three from '../assets/preview/3.jpg';
+import Four from '../assets/preview/4.jpg';
+import Five from '../assets/preview/5.jpg';
 
 @Component
 export default class PreviewDemo extends Vue {
 
     private shouldShow = false;
+
     private imgList = [
-        // {
-        //     url: Close
-        // },
         {
             id: 1,
-            url: 'https://dss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1603365312,3218205429&fm=26&gp=0.jpg',
-        },
-        {
-            id: 4,
-            url: 'https://img.iplaysoft.com/wp-content/uploads/2019/free-images/free_stock_photo.jpg!0x0.webp'
+            url: One,
         },
         {
             id: 2,
-            url: 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1819216937,2118754409&fm=26&gp=0.jpg',
+            url: Two,
         },
         // {
         //     id: 3,
-        //     url: 'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2005235653,1742582269&fm=26&gp=0.jpg',
+        //     url: Three,
+        // },
+        // {
+        //     id: 4,
+        //     url: Four,
+        // },
+        // {
+        //     id: 5,
+        //     url: Five,
         // },
     ];
 
     private handleShowPreview () {
         this.shouldShow = true;
-        this.$preview.getContainer(() => (document.querySelector('.right') as HTMLElement))
-            .open({
-                imgList: this.imgList,
-                change: (params: any) => {
-                    console.log(params);
-                },
-                menuList: { leftRotate: false }
-            });
-        // this.$preview.getContainer(() => document.querySelector('.right'))
+        // this.$preview.getContainer(() => (document.querySelector('.right') as HTMLElement))
         //     .open({
-        //         imgList: this.imgList
+        //         imgList: this.imgList,
+        //         change: (params: any) => {
+        //             console.log(params);
+        //         },
+        //         menuList: { leftRotate: false }
+        //     });
+        // this.$preview
+        //     .open({
+        //         imgList: this.imgList,
+        //         change: (params: any) => {
+        //             console.log(params);
+        //         },
         //     });
     }
 

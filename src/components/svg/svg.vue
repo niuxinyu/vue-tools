@@ -16,7 +16,7 @@ export default class Icon extends Vue {
 
     public get getSvgSize () {
         return {
-            'font-size': this.size + 'px'
+            'font-size': this.size + 'px',
         };
     }
 

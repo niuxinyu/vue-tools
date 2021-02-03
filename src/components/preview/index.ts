@@ -1,5 +1,6 @@
 import Vue, { CreateElement } from 'vue';
 import { noop } from '@/libs/tools';
+import { removeClass } from '@/libs/style';
 import Preview from './preview.vue';
 import { MenuList } from '../../../types/preview/preview';
 
@@ -37,6 +38,7 @@ function getNewInstance (properties?: any) {
                         // 这里处理组件内部的关闭事件
                         // 500 用来等动画做完
                         if (PreviewInstance && wrapper.parentNode) {
+                            removeClass(document.documentElement, 'vt-preview-open');
                             setTimeout(() => {
                                 PreviewInstance.$destroy();
                                 PreviewInstance = null;

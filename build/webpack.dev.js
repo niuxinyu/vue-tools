@@ -11,7 +11,8 @@ module.exports = merge(webpackConfigBase, {
         main: './examples/main.ts',
         // vendors: ['vue', 'vue-router'],
     },
-    devtool: 'cheap-source-map',
+    // devtool: 'cheap-source-map',
+    devtool: 'source-map',
     devServer: {
         hot: true,
         port: 8888,

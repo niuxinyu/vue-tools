@@ -1,9 +1,22 @@
 @fadeClassName: vt-fade;
 
-.@{fadeClassName}-enter-active, .@{fadeClassName}-leave-active {
-    transition: opacity .5s;
+//.@{fadeClassName}-enter-active, .@{fadeClassName}-leave-active {
+//    transition: opacity .5s;
+//}
+//
+//.@{fadeClassName}-enter, .@{fadeClassName}-leave-to {
+//    opacity: 0;
+//}
+
+
+.fade-motion(@className) {
+    .@{className}-enter-active, .@{className}-leave-active {
+        transition: opacity .5s;
+    }
+
+    .@{className}-enter, .@{className}-leave-to {
+        opacity: 0;
+    }
 }
 
-.@{fadeClassName}-enter, .@{fadeClassName}-leave-to {
-    opacity: 0;
-}
+.fade-motion(@fadeClassName);
