@@ -6,7 +6,7 @@
         "dev": "cross-env NODE_ENV=development webpack serve --config build/webpack.dev.js",
         "build": "cross-env NODE_ENV=production webpack --config build/webpack.prod.js",
         "build-css-in": "cross-env NODE_ENV=production CSSIN=true webpack --config build/webpack.prod.js",
-        "lint": "eslint src --fix --ext .ts,.tsx,.js,.jsx,.vue",
+        "lint": "eslint src/ examples/ --fix --ext .ts,.tsx,.js,.jsx,.vue",
         "test:unit": "jest --config test/unit/jest.config.js --coverage"
     },
     "repository": {
