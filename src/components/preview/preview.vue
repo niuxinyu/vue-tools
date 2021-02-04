@@ -337,11 +337,6 @@ export default class Preview extends Vue {
 
   private _initialCloneImgList () {
     // 数据如果小于3还是普通切换模式即可
-    // reallyIndex 总是比索引大1
-    // const first = simpleDeepClone(this.imgList[this.imgList.length - 1]);
-    // const last = simpleDeepClone(this.imgList[this.reallyIndex - 1]);
-    // first.id = getUniqueId();
-    // last.id = getUniqueId();
     if (this.imgList.length <= 2) {
       this.isShortImgList = true;
       this.currentIndex = 1;
