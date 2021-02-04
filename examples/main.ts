@@ -8,6 +8,7 @@ import VueTools from '../src/index';
 // import VueTools from '../dist/vue-tools.min.js';
 // import '../dist/css/main.css';
 import PreviewDemo from './components/preview-demo.vue';
+import DraggableDemo from './components/DraggableDemo/DraggableDemo.vue';
 
 // console.log(axios);
 
@@ -19,6 +20,10 @@ const router = new VueRouter({
         {
             path: '/preview',
             component: PreviewDemo,
+        },
+        {
+            path: '/draggable',
+            component: DraggableDemo,
         },
     ],
 });

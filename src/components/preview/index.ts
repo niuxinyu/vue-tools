@@ -7,9 +7,6 @@ import { MenuList } from '../../../types/preview/preview';
 let PreviewInstance!: Preview;
 let container!: HTMLElement | void;
 
-// 这种写法显然不行
-// 2021年2月1日12点57分
-// 有时间需要着重修改该组件创建和销毁的逻辑
 function getNewInstance (properties?: any) {
     const wrapper = document.createElement('div');
     const el = document.createElement('div');
@@ -56,7 +53,6 @@ function getNewInstance (properties?: any) {
         el.appendChild(component.$el);
     }
     else {
-        // document.body.appendChild(component.$el);
         // eslint-disable-next-line no-lonely-if
         if (document.querySelector('.vt-wrapper')) {
             el.appendChild(component.$el);

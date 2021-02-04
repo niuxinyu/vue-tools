@@ -1,8 +1,11 @@
 <template>
     <div>
-        <ul>
+        <ul class="ul">
             <li>
                 <router-link to="/preview">preview</router-link>
+            </li>
+            <li>
+                <router-link to="/draggable">draggable</router-link>
             </li>
         </ul>
         <router-view></router-view>
@@ -32,6 +35,11 @@ export default class App extends Vue {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="less">
+.ul {
+    display: flex;
+    li {
+        margin: 0 8px;
+    }
+}
 </style>

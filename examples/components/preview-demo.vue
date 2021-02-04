@@ -48,18 +48,18 @@ export default class PreviewDemo extends Vue {
             id: 2,
             url: Two,
         },
-        // {
-        //     id: 3,
-        //     url: Three,
-        // },
-        // {
-        //     id: 4,
-        //     url: Four,
-        // },
-        // {
-        //     id: 5,
-        //     url: Five,
-        // },
+        {
+            id: 3,
+            url: Three,
+        },
+        {
+            id: 4,
+            url: Four,
+        },
+        {
+            id: 5,
+            url: Five,
+        },
     ];
 
     private handleShowPreview () {

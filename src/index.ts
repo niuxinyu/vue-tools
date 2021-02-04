@@ -1,11 +1,13 @@
 import { VueConstructor } from 'vue';
-import Preview from './components/preview/index';
+import Draggable from '@/components/Draggable/Draggable.vue';
 import Icon from './components/svg/svg.vue';
+import Preview from './components/preview/index';
 import './styles/index.less';
 
 const components = {
     Icon,
     Preview,
+    Draggable,
 } as Record<string, any>;
 
 const install = (Vue: VueConstructor, options = {}) => {
