@@ -125,9 +125,6 @@ export default class Preview extends Vue {
   // 容器初始宽度
   private previewWrapperClientWidth = 0; // 客户端宽度
 
-  // eslint-disable-next-line no-undef
-  private imgItemList!: NodeListOf<HTMLImageElement>;
-
   // 容器 是否切换动画
   private isCloseAnimation = true;
 
@@ -250,10 +247,11 @@ export default class Preview extends Vue {
       // 挂载之后获取宽度
       this.$nextTick(() => {
         this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
-        this.imgItemList = (document.querySelectorAll(imgItem));
-        Array.prototype.forEach.call(this.imgItemList, (item: HTMLImageElement) => {
-          eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-        });
+        if (typeof this.$refs.imgItem !== 'undefined') {
+          (this.$refs.imgItem as HTMLImageElement[]).forEach((img: HTMLImageElement) => {
+            eventHandle.addEvent(img, 'mousedown', this.handleMouseDown);
+          });
+        }
         this.handleChangeImgWidth();
       });
     }
@@ -372,12 +370,11 @@ export default class Preview extends Vue {
       if (this.previewWrapperClientWidth === 0) {
         this.previewWrapperClientWidth = getNumber(document.querySelector('.' + prefixCls + 'scroll-wrapper')?.clientWidth);
       }
-      if (!this.imgItemList || !this.imgItemList.length) {
-        this.imgItemList = document.querySelectorAll('.' + prefixCls + 'img');
+      if (typeof this.$refs.imgItem !== 'undefined') {
+        (this.$refs.imgItem as HTMLImageElement[]).forEach((item: HTMLImageElement) => {
+          eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
+        });
       }
-      this.imgItemList.forEach((item: HTMLImageElement) => {
-        eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-      });
       this.handleChangeImgWidth();
     });
   }
@@ -535,12 +532,13 @@ export default class Preview extends Vue {
   }
 
   private getCurrentImgElement () {
-    // 基本上，vt-preview-item 内部只有一个img元素
     if (typeof this.currentIndex === 'number' && !this.isShortImgList) {
-      this.currentImgElement = (document.querySelectorAll('.vt-preview-item')[1].firstChild as HTMLImageElement);
+      // 一般情况下，currentImgElement 永远是$refs.imgItem 中间的值
+      this.currentImgElement = (this.$refs.imgItem as HTMLImageElement[])[1];
     }
     else {
-      this.currentImgElement = this.imgItemList[this.currentIndex];
+      // this.currentImgElement = this.imgItemList[this.currentIndex];
+      this.currentImgElement = this.$refs.imgItem[this.currentIndex];
     }
   }
 
