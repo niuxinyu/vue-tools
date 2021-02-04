@@ -188,7 +188,7 @@ export default class Preview extends Vue {
   private get getPreviewWrapper () {
     return {
       transform: `translate3d(${(-(!this.isShortImgList ? this.togglePreview : this.currentIndex) * this.previewWrapperClientWidth)}px, 0, 0)`,
-      'transition-duration': this.isCloseAnimation ? '0ms' : '200ms',
+      'transition-duration': this.isCloseAnimation ? '0ms' : '300ms',
       width: `${this.cloneImgList.length * this.previewWrapperClientWidth}px`,
     };
   }
@@ -199,7 +199,7 @@ export default class Preview extends Vue {
         return {
           width: this.imgStyleWidth + 'px',
           transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
-          'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
+          'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '300ms',
           'margin-left': '0px',
           'margin-top': '0px',
           cursor: this.isGrabbing ? 'grabbing' : 'grab',
@@ -209,7 +209,7 @@ export default class Preview extends Vue {
         return {
           width: this.imgStyleWidth + 'px',
           transform: `scale(${this.scaleInit}) rotate(${this.rotate}deg)`,
-          'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '200ms',
+          'transition-duration': this.isSomeOneCloseAnimation ? '0ms' : '300ms',
           'margin-left': '0px',
           'margin-top': '0px',
           cursor: this.isGrabbing ? 'grabbing' : 'grab',
