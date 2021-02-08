@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpackConfigBase = require('./webpack.base');
 const {
     pro,
@@ -47,6 +48,11 @@ function getPlugins () {
         }),
         new OptimizeCSSAssetsPlugin(),
         new webpack.BannerPlugin(copyright),
+        // 测试 cdn 引入vue externals
+        // new HtmlWebpackPlugin({
+        //     filename: 'index.html',
+        //     template: './public/index.html',
+        // }),
     ];
 }
 
@@ -58,6 +64,8 @@ const ignoreBundle = {
         amd: 'vue',
         root: 'Vue',
     },
+    // 测试cdn引入vue
+    // vue: 'Vue',
     // 'vue-class-component': {
     //     commonjs: 'vue-class-component',
     //     commonjs2: 'vue-class-component',
