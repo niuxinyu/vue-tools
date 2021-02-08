@@ -41,21 +41,6 @@ function getRules () {
 }
 
 function getPlugins () {
-<<<<<<< HEAD
-    return [
-        new CleanWebpackPlugin(),
-        new MiniCssExtractPlugin({
-            filename: 'css/[name].css',
-        }),
-        new OptimizeCSSAssetsPlugin(),
-        new webpack.BannerPlugin(copyright),
-        // 测试 cdn 引入vue externals
-        // new HtmlWebpackPlugin({
-        //     filename: 'index.html',
-        //     template: './public/index.html',
-        // }),
-    ];
-=======
   return [
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
@@ -63,41 +48,30 @@ function getPlugins () {
     }),
     new OptimizeCSSAssetsPlugin(),
     new webpack.BannerPlugin(copyright),
+    // 测试 cdn 引入vue externals
+    // new HtmlWebpackPlugin({
+    //     filename: 'index.html',
+    //     template: './public/index.html',
+    // }),
   ];
->>>>>>> 574a14b5ce9a8eee9dfe0d3b364b790977647599
 }
 
 // eslint-disable-next-line
 const ignoreBundle = {
-<<<<<<< HEAD
-    vue: {
-        commonjs: 'vue',
-        commonjs2: 'vue',
-        amd: 'vue',
-        root: 'Vue',
-    },
-    // 测试cdn引入vue
-    // vue: 'Vue',
-    // 'vue-class-component': {
-    //     commonjs: 'vue-class-component',
-    //     commonjs2: 'vue-class-component',
-    //     amd: 'vue-class-component',
-    //     root: 'vue-class-component',
-    // },
-=======
   vue: {
     commonjs: 'vue',
     commonjs2: 'vue',
     amd: 'vue',
     root: 'Vue',
   },
+  // 测试cdn引入vue
+  // vue: 'Vue',
   // 'vue-class-component': {
   //     commonjs: 'vue-class-component',
   //     commonjs2: 'vue-class-component',
   //     amd: 'vue-class-component',
   //     root: 'vue-class-component',
   // },
->>>>>>> 574a14b5ce9a8eee9dfe0d3b364b790977647599
 }; // 忽略打包文件
 
 module.exports = merge(webpackConfigBase, {
