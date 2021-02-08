@@ -3,5 +3,5 @@ interface CustomObj<T> {
 }
 
 export {
-    CustomObj,
+  CustomObj,
 };

@@ -16,19 +16,19 @@ Vue.use(VueRouter);
 Vue.use(VueTools);
 
 const router = new VueRouter({
-    routes: [
-        {
-            path: '/preview',
-            component: PreviewDemo,
-        },
-        {
-            path: '/draggable',
-            component: DraggableDemo,
-        },
-    ],
+  routes: [
+    {
+      path: '/preview',
+      component: PreviewDemo,
+    },
+    {
+      path: '/draggable',
+      component: DraggableDemo,
+    },
+  ],
 });
 
 new Vue({
-    router,
-    render: (h) => h(App),
+  router,
+  render: (h) => h(App),
 }).$mount('#app');
