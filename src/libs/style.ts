@@ -86,3 +86,23 @@ export function removeClass (element: HTMLElement, className: string): void {
   newClassList = oldClassList.replace(' ' + className + ' ', ' ');
   element.className = newClassList.substring(1, newClassList.length - 1);
 }
+
+// 当前浏览器支持的位移方法
+export function getPositioningCSS () {
+  const vendorPrefix = ('WebkitTransform' in emptyStyle) ? 'Webkit'
+    : ('MozTransform' in emptyStyle) ? 'Moz'
+      : ('msTransform' in emptyStyle) ? 'ms'
+        : ('OTransform' in emptyStyle) ? 'O' : '';
+  if (vendorPrefix + 'Perspective' in emptyStyle) {
+    // Modern browsers with 3D support, e.g. Webkit, IE10
+    return 'translate3d';
+  }
+  if (vendorPrefix + 'Transform' in emptyStyle) {
+    // Browsers without 3D support, e.g. IE9
+    return 'translate';
+  }
+
+  // Browsers without translate() support, e.g. IE7-8
+  return 'margin';
+
+}

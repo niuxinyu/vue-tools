@@ -93,6 +93,8 @@ module.exports = {
     'no-shadow': 0,
     // 允许代码中的任意地方执行require
     'global-require': 0,
+    // 允许嵌套、连用三元表达式
+    'no-nested-ternary': 0,
     // ts
     // 允许在ts内使用var和require
     '@typescript-eslint/no-var-requires': 0,

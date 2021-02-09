@@ -41,7 +41,7 @@ function getEntryBy () {
 module.exports = {
   context: project,
   // target: ['web', 'es5'],
-  target: 'web',
+  target: ['web', 'es5'],
   // entry: getEntryBy(),
   resolve: {
     alias,

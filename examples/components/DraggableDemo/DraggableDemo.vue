@@ -1,6 +1,8 @@
 <template>
     <div>
-        <Draggable></Draggable>
+      <Draggable>
+        测试的内容
+      </Draggable>
     </div>
 </template>
 
