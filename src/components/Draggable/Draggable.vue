@@ -78,8 +78,15 @@ export default class Draggable extends Vue {
     e.preventDefault();
     let diffX: number;
     let diffY: number;
-    this.dragWidth = (this.$refs.dragWrapper as HTMLElement).clientWidth;
-    this.dragHeight = (this.$refs.dragWrapper as HTMLElement).clientHeight;
+    const dragWrapper = (this.$refs.dragWrapper as HTMLElement);
+    if (+dragWrapper.offsetWidth > this.windowWidth) {
+      dragWrapper.style.width = this.windowWidth + 'px';
+    }
+    else if (+dragWrapper.offsetHeight > this.windowHeight) {
+      dragWrapper.style.height = this.windowHeight + 'px';
+    }
+    this.dragWidth = dragWrapper.clientWidth;
+    this.dragHeight = dragWrapper.clientHeight;
     const transPos = TRANS.exec((this.$refs.dragWrapper as HTMLElement).style.transform);
     if (transPos !== null && transPos.length) {
       // 1 3 5
