@@ -16,11 +16,11 @@
       <h1>第一行</h1>
       <h1>第一行</h1>
       <h1>第一行</h1>
-                  <Preview
-                      v-model="shouldShow"
-                      :img-list="imgList"
-                      @change="handleClose"
-                  ></Preview>
+      <!--                  <Preview-->
+      <!--                      v-model="shouldShow"-->
+      <!--                      :img-list="imgList"-->
+      <!--                      @change="handleClose"-->
+      <!--                  ></Preview>-->
     </div>
     <button @click="handleShowPreview">点击图片预览</button>
   </div>
@@ -72,13 +72,13 @@ export default class PreviewDemo extends Vue {
     //         },
     //         menuList: { leftRotate: false }
     //     });
-    // this.$preview
-    //     .open({
-    //         imgList: this.imgList,
-    //         change: (params: any) => {
-    //             console.log(params);
-    //         },
-    //     });
+    this.$preview
+      .open({
+        imgList: this.imgList,
+        change: (params: any) => {
+          console.log(params);
+        },
+      });
   }
 
   private handleClose (params: boolean) {

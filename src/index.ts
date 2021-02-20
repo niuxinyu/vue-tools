@@ -28,6 +28,7 @@ if (typeof window !== 'undefined' && window.Vue) {
 export {
   Icon,
   Preview,
+  Draggable,
 };
 
 export default {

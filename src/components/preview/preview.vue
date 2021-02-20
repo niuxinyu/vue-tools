@@ -14,6 +14,7 @@
         <div
           :style="getPreviewWrapper"
           :class="[prefixCls + 'wrapper']"
+          ref="imgItemWrapper"
         >
           <div v-for="(item, index) in cloneImgList"
                :key="item.id"
@@ -241,17 +242,14 @@ export default class Preview extends Vue {
 
   /** ***********************watch******************************* */
   @Watch('value')
-  onValueChange (newVal: boolean, oldVal: boolean) {
-    if (newVal !== oldVal) {
+  onValueChange (newVal: boolean) {
+    if (newVal) {
+      this._initialPreview();
       addClass(document.documentElement, 'vt-preview-open');
       // 挂载之后获取宽度
       this.$nextTick(() => {
         this.previewWrapperClientWidth = getNumber(document.querySelector('.vt-preview-scroll-wrapper')?.clientWidth);
-        if (typeof this.$refs.imgItem !== 'undefined') {
-          (this.$refs.imgItem as HTMLImageElement[]).forEach((img: HTMLImageElement) => {
-            eventHandle.addEvent(img, 'mousedown', this.handleMouseDown);
-          });
-        }
+        eventHandle.addEvent((this.$refs.imgItemWrapper as HTMLElement), 'mousedown', this.handleMouseDown);
         this.handleChangeImgWidth();
       });
     }
@@ -268,6 +266,13 @@ export default class Preview extends Vue {
         this.handleGetCloneImgList();
       }
       this.handleResetImgStyle();
+    }
+  }
+
+  @Watch('shouldShow')
+  onShouldShow (newVal: boolean) {
+    if (newVal) {
+      this._initialPreview();
     }
   }
 
@@ -314,7 +319,7 @@ export default class Preview extends Vue {
     eventHandle.addEvent(window, 'resize', throttle(this.handleWindowResize, 100));
   }
 
-  private created () {
+  private _initialPreview () {
     this._initialImgList();
     this._initialImgListHasId();
     this.sourceImgList = this.imgList;
@@ -370,11 +375,7 @@ export default class Preview extends Vue {
       if (this.previewWrapperClientWidth === 0) {
         this.previewWrapperClientWidth = getNumber(document.querySelector('.' + prefixCls + 'scroll-wrapper')?.clientWidth);
       }
-      if (typeof this.$refs.imgItem !== 'undefined') {
-        (this.$refs.imgItem as HTMLImageElement[]).forEach((item: HTMLImageElement) => {
-          eventHandle.addEvent(item, 'mousedown', this.handleMouseDown);
-        });
-      }
+      eventHandle.addEvent((this.$refs.imgItemWrapper as HTMLElement), 'mousedown', this.handleMouseDown);
       this.handleChangeImgWidth();
     });
   }
@@ -538,7 +539,7 @@ export default class Preview extends Vue {
     }
     else {
       // this.currentImgElement = this.imgItemList[this.currentIndex];
-      this.currentImgElement = this.$refs.imgItem[this.currentIndex];
+      this.currentImgElement = (this.$refs.imgItem as HTMLImageElement[])[this.currentIndex];
     }
   }
 
