@@ -1,20 +1,20 @@
 <template>
   <transition name="vt-fade">
     <div
-      v-if="value || shouldShow"
-      :class="[prefixCls + 'img-preview']"
-      :style="getImgPreview"
+        v-if="value || shouldShow"
+        :class="[prefixCls + 'img-preview']"
+        :style="getImgPreview"
     >
       <div
-        :class="[prefixCls + 'bg']"
+          :class="[prefixCls + 'bg']"
       ></div>
       <div
-        :class="[prefixCls + 'scroll-wrapper']"
+          :class="[prefixCls + 'scroll-wrapper']"
       >
         <div
-          :style="getPreviewWrapper"
-          :class="[prefixCls + 'wrapper']"
-          ref="imgItemWrapper"
+            :style="getPreviewWrapper"
+            :class="[prefixCls + 'wrapper']"
+            ref="imgItemWrapper"
         >
           <div v-for="(item, index) in cloneImgList"
                :key="item.id"
@@ -22,11 +22,11 @@
                :class="[prefixCls + 'item']"
           >
             <img
-              :src="item.url"
-              :style="getImgStyle(index)"
-              :class="[prefixCls + 'img']"
-              ref="imgItem"
-              draggable="false"
+                :src="item.url"
+                :style="getImgStyle(index)"
+                :class="[prefixCls + 'img']"
+                ref="imgItem"
+                draggable="false"
             >
           </div>
         </div>
@@ -74,7 +74,7 @@
 
 <script lang="ts">
 import {
-  Component, Emit, Prop, Vue, Watch,
+  Component, Emit, Prop, Vue, Watch, Ref,
 } from 'vue-property-decorator';
 import { addClass, css, removeClass } from '@/libs/style';
 import { eventHandle } from '@/libs/dom';
@@ -110,6 +110,8 @@ export default class Preview extends Vue {
   @Prop({ default: true }) private leftRotate!: boolean;
 
   @Prop({ default: true }) private rightRotate!: boolean;
+
+  @Ref('imgItem') readonly imgItem: HTMLImageElement[];
 
   // 当前图片的指针
   private currentIndex = 0;
@@ -434,7 +436,7 @@ export default class Preview extends Vue {
       }
       this.handleGetCloneImgList();
       this.$nextTick(() => {
-        const nexImgItem = (this.$refs.imgItem as HTMLImageElement[])[2];
+        const nexImgItem = this.imgItem[2];
         this.handleChangeImgWidthUtil(nexImgItem);
         eventHandle.addEvent(nexImgItem, 'mousedown', this.handleMouseDown);
       });
@@ -449,7 +451,7 @@ export default class Preview extends Vue {
       this.currentIndex < 0 && (this.currentIndex = this.sourceImgList.length - 1);
       this.handleGetCloneImgList();
       this.$nextTick(() => {
-        const prevImgItem = (this.$refs.imgItem as HTMLImageElement[])[2];
+        const prevImgItem = this.imgItem[2];
         this.handleChangeImgWidthUtil(prevImgItem);
         eventHandle.addEvent(prevImgItem, 'mousedown', this.handleMouseDown);
       });
@@ -535,11 +537,11 @@ export default class Preview extends Vue {
   private getCurrentImgElement () {
     if (typeof this.currentIndex === 'number' && !this.isShortImgList) {
       // 一般情况下，currentImgElement 永远是$refs.imgItem 中间的值
-      this.currentImgElement = (this.$refs.imgItem as HTMLImageElement[])[1];
+      this.currentImgElement = this.imgItem[1];
     }
     else {
       // this.currentImgElement = this.imgItemList[this.currentIndex];
-      this.currentImgElement = (this.$refs.imgItem as HTMLImageElement[])[this.currentIndex];
+      this.currentImgElement = this.imgItem[this.currentIndex];
     }
   }
 
@@ -564,8 +566,8 @@ export default class Preview extends Vue {
 
   private handleChangeImgWidth () {
     // 重置图片的尺寸
-    if (!this.$refs.imgItem) return;
-    (this.$refs.imgItem as HTMLImageElement[]).forEach((img: HTMLImageElement) => {
+    if (!this.imgItem) return;
+    this.imgItem.forEach((img: HTMLImageElement) => {
       this.handleChangeImgWidthUtil(img);
     });
   }
